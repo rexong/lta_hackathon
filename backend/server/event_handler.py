@@ -16,7 +16,14 @@ def create_event():
     if not (timestamp and town and street and congestion_level and speed and end_node):
         return jsonify({'message': 'Missing required fields'}), 400
 
-    event_id = verified_event_storage.create(timestamp, town, street)
+    event_id = verified_event_storage.create(
+        timestamp,
+        town,
+        street,
+        congestion_level,
+        speed,
+        end_node
+    )
     return jsonify({'message': 'Event created', 'event_id': event_id}), 201
 
 

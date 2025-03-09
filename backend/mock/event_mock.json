@@ -1,0 +1,42 @@
+[
+    {
+        "timestamp": "2025-03-09T12:00:00Z",
+        "town": "Town1",
+        "street": "Street1",
+        "congestion_level": 2,
+        "speed": 45.5,
+        "end_node": "NodeA"
+    },
+    {
+        "timestamp": "2025-03-09T13:00:00Z",
+        "town": "Town2",
+        "street": "Street2",
+        "congestion_level": 1,
+        "speed": 60.2,
+        "end_node": "NodeB"
+    },
+    {
+        "timestamp": "2025-03-09T14:00:00Z",
+        "town": "Town3",
+        "street": "Street3",
+        "congestion_level": 3,
+        "speed": 35.0,
+        "end_node": "NodeC"
+    },
+    {
+        "timestamp": "2025-03-09T15:00:00Z",
+        "town": "Town4",
+        "street": "Street4",
+        "congestion_level": 2,
+        "speed": 40.1,
+        "end_node": "NodeD"
+    },
+    {
+        "timestamp": "2025-03-09T16:00:00Z",
+        "town": "Town5",
+        "street": "Street5",
+        "congestion_level": 1,
+        "speed": 55.7,
+        "end_node": "NodeE"
+    }
+]
