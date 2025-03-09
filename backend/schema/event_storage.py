@@ -42,7 +42,8 @@ class EventStorage:
             street=None,
             congestion_level=None,
             speed=None,
-            end_node=None
+            end_node=None,
+            score=None
         ):
         event = self.events.get(event_id, None)
         if event:
@@ -58,6 +59,8 @@ class EventStorage:
                 event.speed = speed
             if end_node:
                 event.end_node = end_node
+            if score:
+                event.score = score
             return event
         return None
 
