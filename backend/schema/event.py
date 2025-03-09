@@ -17,6 +17,26 @@ Congestion Level: {self.congestion_level}
 Speed: {self.speed}\
 """
 
+    def to_dict(self):
+        return {
+            "timestamp": self.timestamp,
+            "town": self.town, 
+            "street": self.street,
+            "congestion_level": self.congestion_level,
+            "speed": self.speed,
+            "end_node": self.end_node
+        }
+
+    def from_dict(self, data):
+        return Event.create(
+            data.get("timestamp", ""),
+            data.get("town", ""),
+            data.get("street", ""),
+            data.get("congestion_level", ""),
+            data.get("speed", ""),
+            data.get("end_node", ""),
+        )
+
     @classmethod
     def create(cls, timestamp, town, street, congestion_level, speed, end_node):
         return cls(timestamp, town, street, congestion_level, speed, end_node)
