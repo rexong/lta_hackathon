@@ -3,7 +3,7 @@ import os
 import json
 
 # The base URL of the Flask app (make sure your app is running on http://127.0.0.1:5000/)
-base_url = "http://127.0.0.1:5000/events/crowdsource"
+base_url = "http://127.0.0.1:5000/events/verified"
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 events_data=[]

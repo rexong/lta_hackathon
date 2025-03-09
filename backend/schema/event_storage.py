@@ -15,7 +15,11 @@ class EventStorage:
             speed,
             end_node
         ):
+        event_id = self.counter
+        self.events[event_id] = event
+        self.counter += 1
         event = Event.create(
+            id,
             timestamp,
             town,
             street,
@@ -23,9 +27,6 @@ class EventStorage:
             speed,
             end_node
         )
-        event_id = self.counter
-        self.events[event_id] = event
-        self.counter += 1
         return event_id
 
     # READ operation: Get an event by ID

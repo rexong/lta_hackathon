@@ -35,7 +35,7 @@ def create_event(storage_type):
         speed,
         end_node
     )
-    return jsonify({'message': 'Event created', 'event_id': event_id}), 201
+    return jsonify({'message': 'Event created', 'id': event_id}), 201
 
 
 def get_event(storage_type, event_id):
@@ -61,6 +61,7 @@ def update_event(storage_type, event_id):
     congestion_level = data.get("congestion_level")
     speed = data.get("speed")
     end_node = data.get("end_node")
+    score = data.get("score")
 
     updated_event = storage.update(
         event_id,
@@ -69,7 +70,8 @@ def update_event(storage_type, event_id):
         street,
         congestion_level,
         speed,
-        end_node
+        end_node,
+        score
     )
     if updated_event:
         return jsonify(updated_event.to_dict()), 200

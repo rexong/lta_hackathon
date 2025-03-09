@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 
-from backend.server.event_handler import (
+from backend.server.event.event_handler import (
     create_event,
     get_event,
     update_event,
