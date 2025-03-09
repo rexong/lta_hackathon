@@ -34,21 +34,11 @@ class CrowdsourceFilter():
         prompt = f"""\
 Below is the information of the new event from the crowdsource data:
 
-Time: {new_event.timestamp}
-Town: {new_event.town}
-Street: {new_event.street}
-End Node: {new_event.end_node}
-Congestion Level: {new_event.congestion_level}
-Speed: {new_event.speed}
+{new_event}
 
 Below is the information of a verified event:
 
-Time: {verified_event.timestamp}
-Town: {verified_event.town}
-Street: {verified_event.street}
-End Node: {verified_event.end_node}
-Congestion Level: {verified_event.congestion_level}
-Speed: {verified_event.speed}
+{verified_event}
 
 Are these events similar to each other?
 """
