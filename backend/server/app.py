@@ -15,11 +15,11 @@ def entry():
     response = {"message": "Server is up and running"}
     return jsonify(response), 200 
 
-app.add_url_rule("/events", view_func=create_event, methods=["POST"])
-app.add_url_rule("/events", view_func=list_events, methods=["GET"])
-app.add_url_rule("/events/<int:event_id>", view_func=get_event, methods=["GET"])
-app.add_url_rule("/events/<int:event_id>", view_func=delete_event, methods=["DELETE"])
-app.add_url_rule("/events/<int:event_id>", view_func=update_event, methods=["PUT"])
+app.add_url_rule("/events/<storage_type>", view_func=create_event, methods=["POST"])
+app.add_url_rule("/events/<storage_type>", view_func=list_events, methods=["GET"])
+app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=get_event, methods=["GET"])
+app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=delete_event, methods=["DELETE"])
+app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=update_event, methods=["PUT"])
 
 if __name__ == "__main__":
     app.run(debug=True)
