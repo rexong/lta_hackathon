@@ -17,25 +17,9 @@ def create_event(storage_type):
         return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
     storage = event_storages[storage_type]
     data = request.get_json()
-    timestamp = data.get('timestamp')
-    town = data.get('town')
-    street = data.get('street')
-    congestion_level = data.get("congestion_level")
-    speed = data.get("speed")
-    end_node = data.get("end_node")
 
-    if not (timestamp and town and street and congestion_level and speed and end_node):
-        return jsonify({'message': 'Missing required fields'}), 400
-
-    event_id = storage.create(
-        timestamp,
-        town,
-        street,
-        congestion_level,
-        speed,
-        end_node
-    )
-    return jsonify({'message': 'Event created', 'id': event_id}), 201
+    event = storage.create(**data)
+    return jsonify({event.to_dict()}), 201
 
 
 def get_event(storage_type, event_id):
@@ -55,23 +39,10 @@ def update_event(storage_type, event_id):
         return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
     storage = event_storages[storage_type]
     data = request.get_json()
-    timestamp = data.get('timestamp')
-    town = data.get('town')
-    street = data.get('street')
-    congestion_level = data.get("congestion_level")
-    speed = data.get("speed")
-    end_node = data.get("end_node")
-    score = data.get("score")
 
     updated_event = storage.update(
         event_id,
-        timestamp,
-        town,
-        street,
-        congestion_level,
-        speed,
-        end_node,
-        score
+        **data
     )
     if updated_event:
         return jsonify(updated_event.to_dict()), 200

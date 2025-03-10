@@ -37,7 +37,7 @@ class EventStorage:
             current_speed,
             previous_speed
         )
-        return event_id
+        return event 
 
     # READ operation: Get an event by ID
     def read(self, event_id):
