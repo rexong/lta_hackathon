@@ -21,10 +21,8 @@ class EventStorage:
             previous_speed=""
         ):
         event_id = self.counter
-        self.events[event_id] = event
-        self.counter += 1
         event = Event.create(
-            id,
+            event_id,
             timestamp,
             town,
             street,
@@ -37,6 +35,8 @@ class EventStorage:
             current_speed,
             previous_speed
         )
+        self.events[event_id] = event
+        self.counter += 1
         return event 
 
     # READ operation: Get an event by ID

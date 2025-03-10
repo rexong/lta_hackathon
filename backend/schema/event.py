@@ -1,6 +1,7 @@
 class Event:
     def __init__(
             self,
+            id="",
             timestamp="",
             town="",
             street="",
@@ -11,21 +12,22 @@ class Event:
             reliability="",
             image_src="",
             current_speed="",
-            previous_speed=""
-        ):
-        self.id = None
+            previous_speed="",
+            score=-1
+    ):
+        self.id = id 
         self.timestamp = timestamp
         self.town = town
         self.street = street
         self.x = x
-        self.y = y,
+        self.y = y
         self.alert_type = alert_type
         self.alert_subtype = alert_subtype
         self.reliability = reliability
         self.image_src = image_src
         self.current_speed = current_speed
         self.previous_speed = previous_speed
-        self.score = -1
+        self.score = score 
 
     def __str__(self):
         return f"""\
@@ -40,7 +42,6 @@ Current Average Speed on Street: {self.current_speed}
 Past Week Average Speed on Street: {self.previous_speed}
 """
 
-    @classmethod
     def to_dict(self):
         return {
             "id": self.id,
@@ -79,7 +80,7 @@ Past Week Average Speed on Street: {self.previous_speed}
     @classmethod
     def create(
         cls, 
-        id,
+        id="",
         timestamp="",
         town="",
         street="",
@@ -94,7 +95,7 @@ Past Week Average Speed on Street: {self.previous_speed}
         score=-1
     ):
         return cls(
-            id, 
+            id,
             timestamp,
             town,
             street,
