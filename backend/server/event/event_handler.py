@@ -19,7 +19,7 @@ def create_event(storage_type):
     data = request.get_json()
 
     event = storage.create(**data)
-    return jsonify({event.to_dict()}), 201
+    return jsonify(event.to_dict()), 201
 
 
 def get_event(storage_type, event_id):
