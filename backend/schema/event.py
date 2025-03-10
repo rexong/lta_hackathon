@@ -1,12 +1,30 @@
 class Event:
-    def __init__(self, timestamp="", town="", street="", congestion_level="", speed="", end_node=""):
+    def __init__(
+            self,
+            timestamp="",
+            town="",
+            street="",
+            x="",
+            y="",
+            alert_type="",
+            alert_subtype="",
+            reliability="",
+            image_src="",
+            current_speed="",
+            previous_speed=""
+        ):
         self.id = None
         self.timestamp = timestamp
         self.town = town
         self.street = street
-        self.congestion_level = congestion_level
-        self.speed = speed 
-        self.end_node = end_node
+        self.x = x
+        self.y = y,
+        self.alert_type = alert_type
+        self.alert_subtype = alert_subtype
+        self.reliability = reliability
+        self.image_src = image_src
+        self.current_speed = current_speed
+        self.previous_speed = previous_speed
         self.score = -1
 
     def __str__(self):
@@ -14,35 +32,79 @@ class Event:
 Time: {self.timestamp}
 Town: {self.town}
 Street: {self.street}
-End Node: {self.end_node}
-Congestion Level: {self.congestion_level}
-Speed: {self.speed}\
+Coordinates: ({self.x}, {self.y})
+Alert Type: {self.alert_type}
+Alert Subtype: {self.alert_subtype}
+Reliability: {self.reliability}
+Current Average Speed on Street: {self.current_speed}
+Past Week Average Speed on Street: {self.previous_speed}
 """
 
     @classmethod
     def to_dict(self):
         return {
+            "id": self.id,
             "timestamp": self.timestamp,
             "town": self.town, 
             "street": self.street,
-            "congestion_level": self.congestion_level,
-            "speed": self.speed,
-            "end_node": self.end_node,
+            "x": self.x,
+            "y": self.y,
+            "alert_type": self.alert_type,
+            "alert_subtype": self.alert_subtype,
+            "reliability": self.reliability,
+            "current_speed": self.current_speed,
+            "previous_speed": self.previous_speed,
+            "image_src": self.image_src,
             "score": self.score
         }
 
     @classmethod
     def from_dict(self, data):
         return Event.create(
+            data.get("id", ""),
             data.get("timestamp", ""),
             data.get("town", ""),
             data.get("street", ""),
-            data.get("congestion_level", ""),
-            data.get("speed", ""),
-            data.get("end_node", ""),
+            data.get("x", ""),
+            data.get("y", ""),
+            data.get("alert_type", ""),
+            data.get("alert_subtype", ""),
+            data.get("reliability", ""),
+            data.get("current_speed", ""),
+            data.get("previous_speed", ""),
+            data.get("image_src", ""),
             data.get("score", -1)
         )
 
     @classmethod
-    def create(cls, id, timestamp, town, street, congestion_level, speed, end_node):
-        return cls(id, timestamp, town, street, congestion_level, speed, end_node)
+    def create(
+        cls, 
+        id,
+        timestamp="",
+        town="",
+        street="",
+        x="",
+        y="",
+        alert_type="",
+        alert_subtype="",
+        reliability="",
+        image_src="",
+        current_speed="",
+        previous_speed="",
+        score=-1
+    ):
+        return cls(
+            id, 
+            timestamp,
+            town,
+            street,
+            x,
+            y,
+            alert_type,
+            alert_subtype,
+            reliability,
+            image_src,
+            current_speed,
+            previous_speed,
+            score
+        )
