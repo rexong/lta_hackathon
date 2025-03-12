@@ -1,3 +1,7 @@
+import logging 
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import numpy as np
@@ -67,6 +71,7 @@ Please score this event accordingly.\
         return {"role":"user", "content": prompt}
     
     def __compute_serverity(self, metrics):
+        logger.info("Priority LLM: Computing Serverity")
         WEIGHTS = {
             "impact_on_traffic_flow": 0.2,
             "location_of_event": 0.2,
@@ -82,6 +87,7 @@ Please score this event accordingly.\
 
 
     def prioritize(self, event: Event):
+        logging.info("Priority LLM: Prioritizing...")
         user_message = self.__user_message_builder(event)
         messages = [self.SYSTEM_MESSAGE, user_message]
         response = self.model.chat.completions.create(
@@ -97,6 +103,7 @@ Please score this event accordingly.\
             score = self.__compute_serverity(metrics)
             return score, explanation
         except json.JSONDecodeError as e:
+            logger.warning("Priority LLM: Unable to get JSON, retrying...")
             return self.prioritize(event)
         
         

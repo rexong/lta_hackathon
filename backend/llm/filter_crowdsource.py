@@ -1,3 +1,7 @@
+import logging 
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 from openai import AzureOpenAI
@@ -45,6 +49,7 @@ Are these events similar to each other?
         return {"role": "user", "content": prompt} 
 
     def filter(self, new_event: Event, verified_event: Event):
+        logger.info("Filter LLM: Filtering...")
         user_message = self.__user_message_builder(new_event, verified_event)
         messages = [self.SYSTEM_MESSAGE, user_message]
         response = self.model.chat.completions.create(
@@ -57,6 +62,7 @@ Are these events similar to each other?
             content = json.loads(content)
             return content.get("event_status"), content.get("explanation")
         except json.JSONDecodeError as e:
+            logger.warning("Filter LLM: Unable to get JSON, retrying...")
             return self.filter(new_event, verified_event)
 
 if __name__ == "__main__":
