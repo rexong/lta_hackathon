@@ -1,11 +1,10 @@
 from flask import Flask, jsonify
 
 from backend.server.event.event_handler import (
-    create_event,
-    get_event,
-    update_event,
-    delete_event,
-    list_events
+    create_event_from_crowdsource,
+    add_verified_event,
+    get_all_events,
+    get_one_event    
 )
 
 app = Flask(__name__)
@@ -15,11 +14,11 @@ def entry():
     response = {"message": "Server is up and running"}
     return jsonify(response), 200 
 
-app.add_url_rule("/events/<storage_type>", view_func=create_event, methods=["POST"])
-app.add_url_rule("/events/<storage_type>", view_func=list_events, methods=["GET"])
-app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=get_event, methods=["GET"])
-app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=delete_event, methods=["DELETE"])
-app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=update_event, methods=["PUT"])
+app.add_url_rule("/events/crowdsource", view_func=create_event_from_crowdsource, methods=["POST"])
+app.add_url_rule("/events/verified", view_func=add_verified_event, methods=["POST"])
+app.add_url_rule("/events/<storage_type>", view_func=get_all_events, methods=["GET"])
+app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=get_one_event, methods=["GET"])
+
 
 if __name__ == "__main__":
     app.run(debug=True)

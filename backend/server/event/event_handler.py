@@ -1,69 +1,53 @@
 from flask import request, jsonify
-from backend.schema.event_storage import EventStorage
+from backend.schema.event import Event
+from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
+from backend.server.event.manager.filtered_manager import FilteredManager
+from backend.server.event.manager.verified_manager import VerifiedManager
+from backend.server.event.manager.manager import (
+    CROWDSOURCE_MANAGER,
+    FILTERED_MANAGER,
+    VERIFIED_MANAGER
+)
 
-crowdsource_event_storage = EventStorage()
-filtered_event_storage = EventStorage()
-verified_event_storage = EventStorage()
-
-event_storages = {
-    "crowdsource": crowdsource_event_storage,
-    "filtered": filtered_event_storage,
-    "verified": verified_event_storage
+MANAGERS = {
+    "crowdsource": CROWDSOURCE_MANAGER,
+    "filtered": FILTERED_MANAGER,
+    "verified": VERIFIED_MANAGER
 }
 
-def create_event(storage_type):
-    """Create a new event."""
-    if storage_type not in event_storages:
-        return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
-    storage = event_storages[storage_type]
+def get_manager(storage_type):
+    if storage_type not in MANAGERS:
+        return None
+    return MANAGERS[storage_type]
+
+def create_event_from_crowdsource():
+    manager: CrowdsourceManager = MANAGERS['crowdsource']
     data = request.get_json()
 
-    event = storage.create(**data)
+    event = manager.add(**data)
     return jsonify(event.to_dict()), 201
 
-
-def get_event(storage_type, event_id):
-    """Get an event by ID."""
-    if storage_type not in event_storages:
-        return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
-    storage = event_storages[storage_type]
-    event = storage.read(event_id)
-    if event:
-        return jsonify(event.to_dict()), 200
-    return jsonify({'message': 'Event not found'}), 404
-
-
-def update_event(storage_type, event_id):
-    """Update an event by ID."""
-    if storage_type not in event_storages:
-        return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
-    storage = event_storages[storage_type]
+def add_verified_event():
+    manager: VerifiedManager = MANAGERS['verified']
     data = request.get_json()
+    verified_event = Event.from_dict(data)
 
-    updated_event = storage.update(
-        event_id,
-        **data
-    )
-    if updated_event:
-        return jsonify(updated_event.to_dict()), 200
-    return jsonify({'message': 'Event not found'}), 404
+    event = manager.add_verified_event(verified_event)
+    return event
 
-
-def delete_event(storage_type, event_id):
-    """Delete an event by ID."""
-    if storage_type not in event_storages:
+def get_all_events(storage_type):
+    manager = get_manager(storage_type)
+    if not manager:
         return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
-    storage = event_storages[storage_type]
-    deleted_event = storage.delete(event_id)
-    if deleted_event:
-        return jsonify({'message': 'Event deleted'}), 200
-    return jsonify({'message': 'Event not found'}), 404
-
-
-def list_events(storage_type):
-    """List all events."""
-    if storage_type not in event_storages:
-        return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
-    storage = event_storages[storage_type]
-    events = storage.list_events()
+    events = manager.get_all()
     return jsonify([event.to_dict() for event in events]), 200
+    
+def get_one_event(storage_type, event_id):
+    manager = get_manager(storage_type)
+    if not manager:
+        return jsonify({'message': f'Event Storage {storage_type} not found!'}), 400
+    event = manager.get_one(event_id)
+    if not event:
+        return jsonify({'message': 'Event not found'}), 404
+    return jsonify(event.to_dict()), 200
+
