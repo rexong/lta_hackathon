@@ -1,19 +1,19 @@
 class Event:
     def __init__(
-            self,
-            id="",
-            timestamp="",
-            town="",
-            street="",
-            x="",
-            y="",
-            alert_type="",
-            alert_subtype="",
-            reliability="",
-            image_src="",
-            current_speed="",
-            previous_speed="",
-            score=-1
+        self,
+        id="",
+        timestamp="",
+        town="",
+        street="",
+        x="",
+        y="",
+        alert_type="",
+        alert_subtype="",
+        reliability="",
+        image_src="",
+        current_speed="",
+        previous_speed="",
+        score=-1
     ):
         self.id = id 
         self.timestamp = timestamp
