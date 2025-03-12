@@ -5,7 +5,6 @@ logger = logging.getLogger(__name__)
 from flask import request, jsonify
 from backend.schema.event import Event
 from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
-from backend.server.event.manager.filtered_manager import FilteredManager
 from backend.server.event.manager.verified_manager import VerifiedManager
 from backend.server.event.manager.manager import (
     CROWDSOURCE_MANAGER,
