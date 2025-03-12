@@ -21,7 +21,7 @@ class Event:
         self.speed_event = speed_event
         self.is_unique = is_unique 
         self.priority_score = priority_score
-        self.repeated_event: typing.List[Event] = repeated_events 
+        self.repeated_events: typing.List[Event] = repeated_events 
 
     def __str__(self):
         builder = []
@@ -40,7 +40,7 @@ class Event:
             "priority_score": self.priority_score,
             "is_unique": self.is_unique,
             "repeated_events": [
-                event.to_dict() for event in self.repeated_event
+                event.to_dict() for event in self.repeated_events
             ]
         }
 

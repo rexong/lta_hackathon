@@ -1,4 +1,7 @@
 from backend.schema.event import Event
+from backend.schema.crowdsource_event import CrowdsourceEvent
+from backend.schema.image_event import ImageEvent
+from backend.schema.speed_event import SpeedEvent
 
 class EventStorage:
     def __init__(self):
@@ -7,33 +10,10 @@ class EventStorage:
 
     def create(
         self, 
-        timestamp,
-        town, 
-        street,
-        x,
-        y,
-        alert_type,
-        alert_subtype,
-        reliability,
-        image_src="",
-        current_speed="",
-        previous_speed=""
+        crowdsource_event: CrowdsourceEvent,
     ):
         event_id = self.counter
-        event = Event.create(
-            event_id,
-            timestamp,
-            town,
-            street,
-            x,
-            y,
-            alert_type,
-            alert_subtype,
-            reliability,
-            image_src,
-            current_speed,
-            previous_speed
-        )
+        event = Event(event_id, crowdsource_event)
         self.events[event_id] = event
         self.counter += 1
         return event 
@@ -44,45 +24,24 @@ class EventStorage:
     def update(
         self,
         event_id,
-        timestamp=None,
-        town=None, 
-        street=None,
-        x=None,
-        y=None,
-        alert_type=None,
-        alert_subtype=None,
-        reliability=None,
-        image_src=None,
-        current_speed=None,
-        previous_speed=None,
-        score=None
+        image_event: ImageEvent = None,
+        speed_event: SpeedEvent = None,
+        is_unique = False,
+        priority_score = -1,
+        repeated_event: Event = None
     ):
         event = self.events.get(event_id, None)
         if event:
-            if timestamp:
-                event.timestamp = timestamp
-            if town:
-                event.town = town
-            if street:
-                event.street = street
-            if x:
-                event.x = x
-            if y:
-                event.y = y
-            if alert_type:
-                event.alert_type = alert_type
-            if alert_subtype:
-                event.alert_subtype = alert_subtype
-            if reliability:
-                event.reliability = reliability
-            if image_src:
-                event.image_src = image_src
-            if current_speed:
-                event.current_speed = current_speed
-            if previous_speed:
-                event.previous_speed = previous_speed
-            if score:
-                event.score = score
+            if image_event:
+                event.image_event = image_event
+            if speed_event:
+                event.speed_event = speed_event
+            if is_unique:
+                event.is_unique = is_unique
+            if priority_score:
+                event.priority_score = priority_score
+            if repeated_event:
+                event.repeated_events.append(repeated_event)
             return event
         return None
 
