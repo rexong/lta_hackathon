@@ -39,22 +39,24 @@ if "incoming" not in st.session_state:
 if "filtered" not in st.session_state:
     st.session_state["filtered"] = []
     dummy1 = { # Data headers refer to Waze excel sent by Temo
-        "longitude": 103.7,
-        "latitude": 1.6,
+        "longitude": 103.88,
+        "latitude": 1.36,
         "road_name": "Farrer Rd", # Street name / Road name
         "date_time": "2025-01-10 12:00", # YYYY-MM-DD HH-MM
         "alert_type": "Road Closed", # Hazard / Jam / Road Closed
         "alert_subtype": "Road Closed Event", # Subtype
         "details": "xxxxxxxxxxx",
+        "priority": "High",
     }
     dummy2 = {
-        "longitude": 103.6,
-        "latitude": 1.5,
+        "longitude": 103.84,
+        "latitude": 1.32,
         "road_name": "Tiong Bahru Rd", # Street name / Road name
         "date_time": "2025-02-15 16:30", # YYYY-MM-DD HH-MM
         "alert_type": "Jam", # Hazard / Jam / Road Closed
         "alert_subtype": "Jam, heavy traffic", # Subtype
         "details": "xxxxxxxxxxx",
+        "priority": "Medium",
     }
     st.session_state["filtered"].append(dummy1)
     st.session_state["filtered"].append(dummy2)
@@ -88,8 +90,8 @@ if "validated" not in st.session_state:
     st.session_state["validated"].append(dummy2)
 
 # Data to be sent to backend to be filtered when user clicks on filter button in Table 1
-if "incoming_to_filter" not in st.session_state:
-    st.session_state["incoming_to_filter"] = []
+#if "incoming_to_filter" not in st.session_state:
+    #st.session_state["incoming_to_filter"] = []
 
 # Incident to show details for upon checking of checkbox by user in Table 2
 if "selected_filtered" not in st.session_state:
@@ -97,14 +99,18 @@ if "selected_filtered" not in st.session_state:
 
 # Data to be sent to backend to be assigned priority when user clicks on Approve button
 # TODO: send data to backend via API
-if "filtered_to_priority" not in st.session_state:
-    st.session_state["filtered_to_priority"] = []
+#if "filtered_to_priority" not in st.session_state:
+    #st.session_state["filtered_to_priority"] = []
+
+# Incident to dispatch information to Telegram etc. for
+if "incident_to_dispatch" not in st.session_state:
+    st.session_state["incident_to_dispatch"] = None
 
 
 # If there are incoming incidents to be filtered i.e. user clicks filter button when there are incoming incidents
 # TODO: send data to backend
-if st.session_state["incoming_to_filter"]:
-    pass
+#if st.session_state["incoming_to_filter"]:
+    #pass
 
 
 # If user wants to view details of a filtered incident i.e. a checkbox is checked
@@ -121,7 +127,7 @@ if st.session_state["selected_filtered"]:
 
     col1, col2, col3 = st.columns([1, 1, 1,]) # Initialise 3 columns
     if col1.button("✅ Approve"): # If incident approved, then add to incidents to be given priority assignment
-        st.session_state["filtered_to_priority"].append(incident)
+        st.session_state["validated"].append(incident)
         st.session_state["filtered"].remove(incident)
         st.session_state["selected_filtered"] = None
         st.rerun()
@@ -134,6 +140,11 @@ if st.session_state["selected_filtered"]:
     if col3.button("⬅ Back"): # If no action taken and user presses back, go back to homepage
         st.session_state["selected_filtered"] = None
         st.rerun()
+
+# If user wants to dispatch information for a specific incident
+# TODO: API call to Telegram or sth
+elif st.session_state["incident_to_dispatch"]:
+    pass
 
 
 # If user does nothing i.e. view homescreen
@@ -165,15 +176,20 @@ else:
                                                                                   # Key to prevent streamlit.errors.StreamlitDuplicateElementId
 
     # Filter button
-    if st.button("Filter Incidents"):
-        st.session_state["incoming_to_filter"] = st.session_state["incoming"] # Store incidents to filter, which will be sent to backend
-        st.session_state["incoming"] = [] # Clear incoming data
-        st.rerun()
+    #if st.button("Filter Incidents"):
+        #st.session_state["incoming_to_filter"] = st.session_state["incoming"] # Store incidents to filter, which will be sent to backend
+        #st.session_state["incoming"] = [] # Clear incoming data
+        #st.rerun()
 
 
     #######################################
     ##### Table 2: Filtered Incidents #####
     st.header("🔍 Filtered Incidents")
+
+    # Initialise column headers and empty row
+    table_col = ["Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
+    empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
+
 
     # If no filtered incidents, display empty table
     if not st.session_state["filtered"]:
@@ -236,6 +252,7 @@ else:
         latitude=1.3521,
         longitude=103.8198,
         zoom=11, # Zoom level
+        min_zoom=10.5,
         pitch=0, # No tilt
     )
 
@@ -244,7 +261,7 @@ else:
         layers=[layer],
         initial_view_state=view_state,
         map_style="mapbox://styles/mapbox/streets-v11", # Streetview selected
-        tooltip=tooltip
+        tooltip=tooltip,
     ))
 
     ##### Table #####
@@ -263,9 +280,12 @@ else:
         df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
 
     df.index.name = "S/N" # Rename index column
-    df = df.drop(columns=["Details"]) # Remove "Details" column   
-    st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width
+    df = df.drop(columns=["Details"]) # Remove "Details" column 
 
+    # Add column for dispatching button
+    df["Dispatch"] = [False] * len(df)
+
+    st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width
 
 
 
