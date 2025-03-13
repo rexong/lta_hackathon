@@ -6,6 +6,7 @@ from backend.schema.event_storage import EventStorage
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
 from backend.schema.speed_event import SpeedEvent
+from backend.server.event.manager.filtered_manager import FilteredManager
 
 class CrowdsourceManager:
     _instance = None
@@ -18,7 +19,8 @@ class CrowdsourceManager:
         if not hasattr(self, "storage"):
             logger.info("Crowdsource Storage: Storage Initialised")
             self.storage = EventStorage()
-    
+            self.filtered_manager = FilteredManager()
+
     def add(
         self,
         timestamp,
@@ -46,6 +48,7 @@ class CrowdsourceManager:
             image_event,
             speed_event
         )
+        self.filtered_manager.notify(event.id)
         return event
 
     def get_all(self):
