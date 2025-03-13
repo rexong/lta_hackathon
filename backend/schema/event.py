@@ -35,8 +35,8 @@ class Event:
         return {
             "id": self.id,
             "crowdsource_event": self.crowdsource_event.to_dict(),
-            "speed_event": self.speed_event.to_dict(),
-            "image_event": self.image_event.to_dict(),
+            "speed_event": self.speed_event.to_dict() if self.speed_event else None,
+            "image_event": self.image_event.to_dict() if self.image_event else None,
             "priority_score": self.priority_score,
             "is_unique": self.is_unique,
             "repeated_events": [
