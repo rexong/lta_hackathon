@@ -15,7 +15,7 @@ MANAGERS = {
     "verified": VerifiedManager() 
 }
 
-lock = threading.lock()
+lock = threading.Lock()
 
 def get_manager(storage_type):
     if storage_type not in MANAGERS:

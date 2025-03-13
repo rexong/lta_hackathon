@@ -16,7 +16,7 @@ def entry():
     return jsonify(response), 200 
 
 app.add_url_rule("/events/crowdsource", view_func=create_event_from_crowdsource, methods=["POST"])
-app.add_url_rule("/event/crowdsource/<int:event_id>/created", view_func=check_event_from_crowdsource_created, methods=["GET"])
+app.add_url_rule("/events/crowdsource/<int:event_id>/created", view_func=check_event_from_crowdsource_created, methods=["GET"])
 app.add_url_rule("/events/verified", view_func=add_verified_event, methods=["POST"])
 app.add_url_rule("/events/<storage_type>", view_func=get_all_events, methods=["GET"])
 app.add_url_rule("/events/<storage_type>/<int:event_id>", view_func=get_one_event, methods=["GET"])

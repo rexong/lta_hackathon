@@ -3,8 +3,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 from backend.schema.event_storage import EventStorage
-from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
-from backend.server.event.manager.verified_manager import VerifiedManager
 
 from backend.llm.model import FILTERER, PRIORITIZER
 
@@ -17,6 +15,8 @@ class FilteredManager:
 
     def __init__(self):
         if not hasattr(self, "storage"):
+            from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
+            from backend.server.event.manager.verified_manager import VerifiedManager
             logger.info("Filtered Storage: Storage Initialised")
             self.storage = EventStorage()
             self.crowdsource_manager = CrowdsourceManager()

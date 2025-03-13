@@ -6,7 +6,6 @@ from backend.schema.event_storage import EventStorage
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
 from backend.schema.speed_event import SpeedEvent
-from backend.server.event.manager.filtered_manager import FilteredManager
 
 class CrowdsourceManager:
     _instance = None
@@ -17,6 +16,7 @@ class CrowdsourceManager:
 
     def __init__(self):
         if not hasattr(self, "storage"):
+            from backend.server.event.manager.filtered_manager import FilteredManager
             logger.info("Crowdsource Storage: Storage Initialised")
             self.storage = EventStorage()
             self.filtered_manager = FilteredManager()
@@ -40,7 +40,7 @@ class CrowdsourceManager:
     ):
         logger.info("Crowdsource Storage: Add new crowdsource event")
 
-        next_id = self.__get_next_event_id()
+        next_id = self.get_next_event_id()
         self.event_creation_status[next_id] = False
         crowdsource_event = CrowdsourceEvent(
             timestamp, 
