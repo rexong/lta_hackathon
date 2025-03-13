@@ -8,9 +8,16 @@ from backend.schema.image_event import ImageEvent
 from backend.schema.speed_event import SpeedEvent
 
 class CrowdsourceManager:
+    _instance = None
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self):
-        logger.info("Crowdsource Storage: Storage Initialised")
-        self.storage = EventStorage()
+        if not hasattr(self, "storage"):
+            logger.info("Crowdsource Storage: Storage Initialised")
+            self.storage = EventStorage()
     
     def add(
         self,
@@ -62,3 +69,24 @@ class CrowdsourceManager:
     def __get_speed_event(self, x, y) -> SpeedEvent:
         logger.info("Crowdsource Storage: Retrieving Speed")
         return None
+
+if __name__ == "__main__":
+    manager = CrowdsourceManager()
+
+    data = {
+        "timestamp": "2024-10-21 08:30:00",
+        "town": "Tampines",
+        "street": "Tampines Ave 10",
+        "x": 103.928405,
+        "y": 1.354571,
+        "alert_type": "ACCIDENT",
+        "reliability": 6 
+    }
+
+    event = manager.add(**data)
+    retrieved_event = manager.get_one(event.id)
+    print(retrieved_event)
+    print(retrieved_event.to_dict())
+    retrieved_events = manager.get_all()
+    print(retrieved_events)
+    print(retrieved_events[0])
