@@ -20,6 +20,13 @@ class CrowdsourceManager:
             logger.info("Crowdsource Storage: Storage Initialised")
             self.storage = EventStorage()
             self.filtered_manager = FilteredManager()
+            self.event_creation_status = {}
+    
+    def get_next_event_id(self):
+        return self.storage.counter
+    
+    def check_event_created(self, event_id):
+        return self.event_creation_status[event_id]
 
     def add(
         self,
@@ -32,6 +39,9 @@ class CrowdsourceManager:
         alert_subtype = "" 
     ):
         logger.info("Crowdsource Storage: Add new crowdsource event")
+
+        next_id = self.__get_next_event_id()
+        self.event_creation_status[next_id] = False
         crowdsource_event = CrowdsourceEvent(
             timestamp, 
             town, 
@@ -49,6 +59,7 @@ class CrowdsourceManager:
             speed_event
         )
         self.filtered_manager.notify(event.id)
+        self.event_creation_status[next_id] = True
         return event
 
     def get_all(self):

@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import threading
 from flask import request, jsonify
 from backend.schema.event import Event
 from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
@@ -14,6 +15,8 @@ MANAGERS = {
     "verified": VerifiedManager() 
 }
 
+lock = threading.lock()
+
 def get_manager(storage_type):
     if storage_type not in MANAGERS:
         return None
@@ -24,9 +27,25 @@ def create_event_from_crowdsource():
 
     manager: CrowdsourceManager = MANAGERS['crowdsource']
     data = request.get_json()
+    pending_event_id = manager.get_next_event_id()
 
-    event = manager.add(**data)
-    return jsonify(event.to_dict()), 201
+    def background_task():
+        with lock:
+            manager.add(**data)
+
+    thread = threading.Thread(target=background_task, daemon=True)
+    thread.start()
+    return jsonify({"event_id": pending_event_id}), 202
+
+def check_event_from_crowdsource_created(event_id):
+    logger.info(f"Flask: GET /event/crowdsource/{event_id}/created Invoked")
+
+    manager: CrowdsourceManager = MANAGERS['crowdsource']
+    is_created = manager.check_event_created(event_id)
+    if not is_created:
+        return jsonify({"event_id": event_id}), 202
+    return jsonify({"event_id": event_id}), 201
+
 
 def add_verified_event():
     logger.info("Flask: POST /events/verified Invoked")
