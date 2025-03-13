@@ -46,7 +46,6 @@ def check_event_from_crowdsource_created(event_id):
         return jsonify({"event_id": event_id}), 202
     return jsonify({"event_id": event_id}), 201
 
-
 def add_verified_event():
     logger.info("Flask: POST /events/verified Invoked")
     manager: VerifiedManager = MANAGERS['verified']
