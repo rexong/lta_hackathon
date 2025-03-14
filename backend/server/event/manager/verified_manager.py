@@ -38,11 +38,6 @@ class VerifiedManager:
             verified_event.is_unique,
             verified_event.priority_score
         )
-
-    def add_repeated_event(self, verified_event_id, repeated_event):
-        logger.info("Verified Storage: Aggregating newly identified repeated event into existing event")
-        event = self.storage.update(verified_event_id, repeated_event)
-        return event
         
     #TODO
     def dispatch(self):

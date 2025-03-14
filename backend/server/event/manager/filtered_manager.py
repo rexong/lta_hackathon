@@ -16,21 +16,19 @@ class FilteredManager:
     def __init__(self):
         if not hasattr(self, "storage"):
             from backend.server.event.manager.crowdsource_manager import CrowdsourceManager
-            from backend.server.event.manager.verified_manager import VerifiedManager
             logger.info("Filtered Storage: Storage Initialised")
             self.storage = EventStorage()
             self.crowdsource_manager = CrowdsourceManager()
-            self.verified_manager = VerifiedManager()
     
     def notify(self, crowdsource_manager_event_id):
         logger.info("Filtered Storage: Got Notified of New Crowdsource Event")
         event_from_crowdsource = self.crowdsource_manager.get_one(crowdsource_manager_event_id)
-        is_new_event, verified_event_id = self.__filter_event(event_from_crowdsource)
+        is_new_event, unique_event_id = self.__filter_event(event_from_crowdsource)
         if is_new_event:
             return self.__create_filtered_event(event_from_crowdsource) 
         else:
             logger.info("Filtered Storage: Informing Verified Manager to add repeated event")
-            not_filtered_event = self.verified_manager.add_repeated_event(verified_event_id, event_from_crowdsource)
+            not_filtered_event = self.__add_repeated_event(unique_event_id, event_from_crowdsource)
             return not_filtered_event
 
     def get_all(self):
@@ -62,28 +60,23 @@ class FilteredManager:
     
     def __filter_event(self, new_crowdsource_event):
         logger.info("Filtered Storage: Check Event is unique")
-        verified_events = self.verified_manager.get_all()
-        for verified_event in verified_events:
-            status, explanation = FILTERER.filter(new_crowdsource_event, verified_event)
-            if status == "repeated":
+        unique_events = self.get_all()
+        for unique_event in unique_events:
+            is_repeated, explanation = FILTERER.filter(new_crowdsource_event, unique_event)
+            if is_repeated:
                 logger.info("Filtered Storage: Duplicated Event Found")
-                return False, verified_event.id 
+                logger.info(f"FILTERER Explanation: {explanation}")
+                return False, unique_event.id 
         logger.info("Filtered Storage: Unique Event Found")
         return True, -1
     
+    def __add_repeated_event(self, unique_event_id, repeated_event):
+        logger.info("Filtered Storage: Aggregating newly identified repeated event into existing event")
+        event = self.storage.update(unique_event_id, repeated_event)
+        return event
+
     def __calculate_priority_score(self, event):
         logger.info("Filtered Storage: Calculating Priority Score")
         score, explanation = PRIORITIZER.prioritize(event)
+        logger.info(f"PRIORITIZER Explanation: {explanation}")
         return score
-
-if __name__ == "__main__":
-    data = {
-        "timestamp": "2024-10-21 08:30:00",
-        "town": "Tampines",
-        "street": "Tampines Ave 10",
-        "x": 103.928405,
-        "y": 1.354571,
-        "alert_type": "ACCIDENT",
-        "reliability": 6 
-    }
-    event = cs_manager.add(**data)

@@ -22,7 +22,7 @@ class CrowdsourceFilter():
         Respond in JSON format as follow:
 
         {
-            "event_status": "new" | "repeated",
+            "is_repeated": true | false,
             "explanation": "Concise reasoning for the classification (max 150 words)."
         }
 
@@ -60,7 +60,7 @@ Are these events similar to each other?
         content = response.choices[0].message.content
         try:
             content = json.loads(content)
-            return content.get("event_status"), content.get("explanation")
+            return content.get("is_repeated"), content.get("explanation")
         except json.JSONDecodeError as e:
             logger.warning("Filter LLM: Unable to get JSON, retrying...")
             return self.filter(new_event, verified_event)
@@ -69,18 +69,38 @@ if __name__ == "__main__":
     from backend.llm.model import client
     f = CrowdsourceFilter(client)
 
-    new_event = Event.create("2024-10-21 16:01:00", "Tampines", "Tampines Ave 10", 2, 28.21, "to TPE(SLE)")
-    similar_event = Event.create("2024-10-21 15:51:00", "Tampines", "Tampines Ave 10", 2, 25.58, "to TPE(SLE)")
-    from datetime import datetime
-    different_event = Event.create(datetime.now(), "Tampines", "Tampines Ave 10", 1, 65.28, None)
+    data = {
+      "alert_subtype": None,
+      "alert_type": "ACCIDENT",
+      "reliability": 6,
+      "street": "Tampines Ave 10",
+      "timestamp": 1741882880.8779533,
+      "town": "Tampines",
+      "x": 103.926906,
+      "y": 1.351775
+    }
 
-    ### new and similar event
-    status, explantion = f.filter(new_event, similar_event)
-    print(f"Status: {status}\nExplantion:{explantion}")
+    from backend.schema.crowdsource_event import CrowdsourceEvent
+    cs_event = CrowdsourceEvent.from_dict(data)
 
-    ### different event
-    status, explantion = f.filter(new_event, different_event)
-    print(f"Status: {status}\nExplantion:{explantion}")
+    new_event = Event(2, cs_event)
+    similar_event = Event(1, cs_event, is_unique=True, priority_score=0.4)
+
+    is_repeated, explantion = f.filter(new_event, similar_event)
+    print(f"Repeated: {is_repeated}\nExplantion:{explantion}")
+
+    # new_event = Event.create("2024-10-21 16:01:00", "Tampines", "Tampines Ave 10", 2, 28.21, "to TPE(SLE)")
+    # similar_event = Event.create("2024-10-21 15:51:00", "Tampines", "Tampines Ave 10", 2, 25.58, "to TPE(SLE)")
+    # from datetime import datetime
+    # different_event = Event.create(datetime.now(), "Tampines", "Tampines Ave 10", 1, 65.28, None)
+
+    # ### new and similar event
+    # status, explantion = f.filter(new_event, similar_event)
+    # print(f"Status: {status}\nExplantion:{explantion}")
+
+    # ### different event
+    # status, explantion = f.filter(new_event, different_event)
+    # print(f"Status: {status}\nExplantion:{explantion}")
     
 
 
