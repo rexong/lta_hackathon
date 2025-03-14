@@ -19,6 +19,7 @@ class CrowdsourceManager:
             from backend.server.manager.filtered_manager import FilteredManager
             logger.info("Crowdsource Storage: Storage Initialised")
             self.storage = EventStorage()
+            self.queue = []
             self.filtered_manager = FilteredManager()
             self.event_creation_status = {}
     
@@ -58,6 +59,7 @@ class CrowdsourceManager:
             image_event,
             speed_event
         )
+        self.queue.append(event.id)
         self.filtered_manager.notify(event.id)
         self.event_creation_status[next_id] = True
         return event

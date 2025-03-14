@@ -18,6 +18,7 @@ class FilteredManager:
             from backend.server.manager.crowdsource_manager import CrowdsourceManager
             logger.info("Filtered Storage: Storage Initialised")
             self.storage = EventStorage()
+            self.queue = []
             self.crowdsource_manager = CrowdsourceManager()
     
     def notify(self, crowdsource_manager_event_id):
@@ -56,6 +57,7 @@ class FilteredManager:
             True,
             priority_score
         )
+        self.queue.append(filtered_event.id)
         return filtered_event
     
     def __filter_event(self, new_crowdsource_event):
@@ -73,6 +75,7 @@ class FilteredManager:
     def __add_repeated_event(self, unique_event_id, repeated_event):
         logger.info("Filtered Storage: Aggregating newly identified repeated event into existing event")
         event = self.storage.update(unique_event_id, repeated_event.id)
+        self.queue.append(event.id)
         return event
 
     def __calculate_priority_score(self, event):

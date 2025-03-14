@@ -16,6 +16,7 @@ class VerifiedManager:
         if not hasattr(self, "storage"):
             logger.info("Verified Storage: Storage Initialised")
             self.storage = EventStorage()
+            self.queue = []
 
     def get_all(self):
         logger.info("Verified Storage: Listing all Events")

@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import threading
-from flask import request, jsonify
+from flask import Response, request, jsonify
 from backend.schema.event import Event
 from backend.server.manager.crowdsource_manager import CrowdsourceManager
 from backend.server.manager.verified_manager import VerifiedManager
@@ -73,3 +73,24 @@ def get_one_event(storage_type, event_id):
         return jsonify({'message': 'Event not found'}), 404
     return jsonify(event.to_dict()), 200
 
+def stream_crowdsource():
+    manager = MANAGERS["crowdsource"]
+    def event_stream():
+        while True:
+            with lock:
+                if manager.queue:
+                    event_id = manager.queue.pop(0)
+                    yield f"data: {event_id}\n\n"
+    
+    return Response(event_stream(), mimetype="text/event-stream")
+
+def stream_filtered():
+    manager = MANAGERS["filtered"]
+    def event_stream():
+        while True:
+            with lock:
+                if manager.queue:
+                    event_id = manager.queue.pop(0)
+                    yield f"data: {event_id}\n\n"
+
+    return Response(event_stream(), mimetype="text/event-stream")
