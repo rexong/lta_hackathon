@@ -14,9 +14,9 @@ for _, row in df.iterrows():
     row = row.replace([np.nan, np.inf, -np.inf], None)
     data = row.to_dict()
     try:
-        time.sleep(random.randint(3,7))
         data['timestamp'] = time.time()
         response = requests.post(url, json=data)
         print(f"Sent: {data}, Reponse: {response.status_code}")
+        time.sleep(random.randint(1,3))
     except requests.exceptions.RequestException as e:
         print(f"Failed to send data: {e}")
