@@ -1,5 +1,3 @@
-import typing
-
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent 
 from backend.schema.speed_event import SpeedEvent
@@ -13,7 +11,7 @@ class Event:
         speed_event: SpeedEvent = None,
         is_unique = False,
         priority_score=-1,
-        repeated_events = []
+        repeated_events_crowdsource_id = []
     ):
         self.id = id 
         self.crowdsource_event = crowdsource_event
@@ -21,7 +19,7 @@ class Event:
         self.speed_event = speed_event
         self.is_unique = is_unique 
         self.priority_score = priority_score
-        self.repeated_events: typing.List[Event] = repeated_events 
+        self.repeated_events_crowdsource_id: list[int] = repeated_events_crowdsource_id
 
     def __str__(self):
         builder = []
@@ -39,9 +37,7 @@ class Event:
             "image_event": self.image_event.to_dict() if self.image_event else None,
             "priority_score": self.priority_score,
             "is_unique": self.is_unique,
-            "repeated_events": [
-                event.to_dict() for event in self.repeated_events
-            ]
+            "repeated_events_crowdsource_id": self.repeated_events_crowdsource_id
         }
 
     @classmethod
@@ -57,8 +53,7 @@ class Event:
             image_event = ImageEvent.from_dict(image_event)
         priority_score = data.get("priority_score", -1)
         is_unique = data.get("is_unique", False)
-        if (repeated_events := data.get("repeated_events")):
-            repeated_events = [Event.from_dict(event) for event in repeated_events]
+        repeated_events_crowdsource_id = data.get("repeated_events_croedsource_id")
         return cls(
            id,
            crowdsource_event,
@@ -66,5 +61,5 @@ class Event:
            speed_event,
            is_unique,
            priority_score,
-           repeated_events 
+           repeated_events_crowdsource_id
         )

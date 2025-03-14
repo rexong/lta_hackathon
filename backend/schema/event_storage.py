@@ -23,7 +23,8 @@ class EventStorage:
             image_event,
             speed_event,
             is_unique,
-            priority_score
+            priority_score,
+            []
         )
         self.events[event_id] = event
         self.counter += 1
@@ -35,11 +36,11 @@ class EventStorage:
     def update(
         self,
         event_id,
-        repeated_event: Event = None
+        repeated_event_id
     ):
         event = self.events.get(event_id, None)
-        if event and repeated_event:
-            event.repeated_events.append(repeated_event)
+        if event:
+            event.repeated_events_crowdsource_id.append(repeated_event_id)
             return event
         return None
 

@@ -111,8 +111,6 @@ if __name__ == "__main__":
     from backend.llm.model import client
     p = Prioritizer(client)
 
-    new_event = Event.create("2024-10-21 16:01:00", "Tampines", "Tampines Ave 10", 2, 28.21, "to TPE(SLE)")
-    print(p.prioritize(new_event))
 
 
 

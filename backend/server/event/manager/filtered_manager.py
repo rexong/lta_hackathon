@@ -27,7 +27,7 @@ class FilteredManager:
         if is_new_event:
             return self.__create_filtered_event(event_from_crowdsource) 
         else:
-            logger.info("Filtered Storage: Informing Verified Manager to add repeated event")
+            logger.info("Filtered Storage: Add repeated event")
             not_filtered_event = self.__add_repeated_event(unique_event_id, event_from_crowdsource)
             return not_filtered_event
 
@@ -72,7 +72,7 @@ class FilteredManager:
     
     def __add_repeated_event(self, unique_event_id, repeated_event):
         logger.info("Filtered Storage: Aggregating newly identified repeated event into existing event")
-        event = self.storage.update(unique_event_id, repeated_event)
+        event = self.storage.update(unique_event_id, repeated_event.id)
         return event
 
     def __calculate_priority_score(self, event):
