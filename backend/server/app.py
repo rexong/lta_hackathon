@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 
-from backend.server.event.event_handler import (
+from backend.server.event_handler import (
     create_event_from_crowdsource,
     check_event_from_crowdsource_created,
     add_verified_event,

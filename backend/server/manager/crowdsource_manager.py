@@ -16,7 +16,7 @@ class CrowdsourceManager:
 
     def __init__(self):
         if not hasattr(self, "storage"):
-            from backend.server.event.manager.filtered_manager import FilteredManager
+            from backend.server.manager.filtered_manager import FilteredManager
             logger.info("Crowdsource Storage: Storage Initialised")
             self.storage = EventStorage()
             self.filtered_manager = FilteredManager()
