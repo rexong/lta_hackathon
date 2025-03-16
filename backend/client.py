@@ -1,7 +1,7 @@
 import requests
 from sseclient import SSEClient
 
-URL = "http://127.0.0.1:5000"
+URL = "http://localhost:5000"
 CROWDSOURCE_URI = "store/crowdsource"
 FILTERED_URI = "store/filtered"
 
