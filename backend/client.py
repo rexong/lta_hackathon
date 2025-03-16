@@ -1,3 +1,5 @@
+import time
+import threading
 import requests
 from sseclient import SSEClient
 
@@ -11,7 +13,7 @@ def listen_to_sse(uri):
         response.raise_for_status()  
         client = SSEClient(response)
         for event in client.events():
-            print(f"Received event id: {event.data}")
+            print(f"Received event id from {uri}: {event.data}")
     except requests.exceptions.ConnectionError:
         print("Error: Unable to connect to the backend. Please make sure the server is running.")
     except requests.exceptions.RequestException as e:
@@ -26,4 +28,12 @@ def listen_to_filtered():
     
 
 if __name__ == "__main__":
-    listen_to_sse()
+    thread_crowdsource = threading.Thread(target=listen_to_crowdsource, daemon=True)
+    thread_filtered = threading.Thread(target=listen_to_filtered, daemon=True)
+
+    thread_crowdsource.start()
+    time.sleep(2)
+    thread_filtered.start()
+
+    thread_crowdsource.join()
+    thread_filtered.join()
