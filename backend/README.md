@@ -3,6 +3,7 @@
 > python -m venv .venv
 2. Install dependencies
 > pip install -r requirements.txt
+3. Make a `.env` and put the OPENAI API KEY in it
 
 # Backend
 There are 2 servers to run,
