@@ -92,7 +92,7 @@ class CrowdsourceManager:
         response = requests.get(url, params=params)
         if response.status_code == 200:
             data = response.json()
-            image_event = ImageEvent(data["camera_id"], x, y, data["image_src"])
+            image_event = ImageEvent(data["camera_id"], data["image_src"])
             return image_event 
 
     def __get_speed_events(self, x, y, street) -> SpeedEvents:
