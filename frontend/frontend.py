@@ -13,6 +13,7 @@ st.set_page_config(layout="wide")
 if "incoming" not in st.session_state:
     st.session_state["incoming"] = []
     dummy1 = { # Data headers refer to Waze excel sent by Temo
+        "id": 123,
         "longitude": 103.3,
         "latitude": 1.2,
         "road_name": "PIE", # Street name / Road name
@@ -22,6 +23,7 @@ if "incoming" not in st.session_state:
         "details": "xxxxxxxxxxx",
     }
     dummy2 = {
+        "id": 105,
         "longitude": 103.5,
         "latitude": 1.4,
         "road_name": "Sengkang West Rd", # Street name / Road name
@@ -39,6 +41,7 @@ if "incoming" not in st.session_state:
 if "filtered" not in st.session_state:
     st.session_state["filtered"] = []
     dummy1 = { # Data headers refer to Waze excel sent by Temo
+        "id": 201,
         "longitude": 103.88,
         "latitude": 1.36,
         "road_name": "Farrer Rd", # Street name / Road name
@@ -49,6 +52,7 @@ if "filtered" not in st.session_state:
         "priority": "High",
     }
     dummy2 = {
+        "id": 153,
         "longitude": 103.84,
         "latitude": 1.32,
         "road_name": "Tiong Bahru Rd", # Street name / Road name
@@ -67,6 +71,7 @@ if "filtered" not in st.session_state:
 if "validated" not in st.session_state:
     st.session_state["validated"] = []
     dummy1 = { # Data headers refer to Waze excel sent by Temo
+        "id": 108,
         "longitude": 103.8600,
         "latitude": 1.3521,
         "road_name": "PIE", # Street name / Road name
@@ -75,8 +80,10 @@ if "validated" not in st.session_state:
         "alert_subtype": "Hazard on shoulder, car stopped", # Subtype
         "details": "xxxxxxxxxxx",
         "priority": "High",
+        "status": "❌ Undispatched",
     }
     dummy2 = {
+        "id": 95,
         "longitude": 103.8600,
         "latitude": 1.3000,
         "road_name": "Sengkang West Rd", # Street name / Road name
@@ -84,7 +91,8 @@ if "validated" not in st.session_state:
         "alert_type": "Jam", # Hazard / Jam / Road Closed
         "alert_subtype": "Jam, stand-still traffic", # Subtype
         "details": "xxxxxxxxxxx",
-        "priority": "Low"
+        "priority": "Low",
+        "status": "❌ Undispatched"
     }
     st.session_state["validated"].append(dummy1)
     st.session_state["validated"].append(dummy2)
@@ -101,6 +109,10 @@ if "selected_filtered" not in st.session_state:
 # TODO: send data to backend via API
 #if "filtered_to_priority" not in st.session_state:
     #st.session_state["filtered_to_priority"] = []
+
+# Incident to show details for upon viewing details in Table 3
+if "selected_validated" not in st.session_state:
+    st.session_state["selected_validated"] = None
 
 # Incident to dispatch information to Telegram etc. for
 if "incident_to_dispatch" not in st.session_state:
@@ -141,6 +153,38 @@ if st.session_state["selected_filtered"]:
         st.session_state["selected_filtered"] = None
         st.rerun()
 
+# If user wants to view details of a validated incident i.e. a checkbox is checked
+elif st.session_state["selected_validated"]:
+    incident = st.session_state["validated"][st.session_state["selected_validated"] - 1]
+
+    st.title("📌Incident Details")
+    st.subheader("S/N xx")
+    st.write(f"**Road Name:** {incident['road_name']}")
+    st.write(f"**Date & Time:** {incident['date_time']}")
+    st.write(f"**Incident Type:** {incident['alert_type']}")
+    st.write(f"**Incident Subtype:** {incident['alert_subtype']}")
+    st.write(f"**Details:** {incident['details']}")
+
+    # TODO:
+    # If incident is undispatched  
+    if incident["status"] == "❌ Undispatched":
+        col1, col2 = st.columns([1, 1,]) # Initialise 3 columns
+        if col1.button("✅ Dispatch"): # If incident dispatched
+            st.session_state["validated"][st.session_state["selected_validated"] - 1]["Status"] = "✅ Dispatched"
+            st.session_state["selected_validated"] = None
+            st.rerun()
+
+        if col2.button("⬅ Back"): # If no action taken and user presses back, go back to homepage
+            st.session_state["selected_validated"] = None
+            st.rerun()
+
+    # If incident already dispatched, then remove dispatch button
+    else:
+        if st.button("⬅ Back"):
+            st.session_state["selected_validated"] = None
+            st.rerun()  
+
+
 # If user wants to dispatch information for a specific incident
 # TODO: API call to Telegram or sth
 elif st.session_state["incident_to_dispatch"]:
@@ -157,8 +201,8 @@ else:
     st.header("📨 Incoming Incidents")
 
     # Initialise column headers and empty row
-    table_col = ["Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details"]
-    empty = ["...", "...", "...", "...", "...", "...", "..."]
+    table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details"]
+    empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
 
     # If no incoming incidents, display empty table
     if not st.session_state["incoming"]:
@@ -187,8 +231,8 @@ else:
     st.header("🔍 Filtered Incidents")
 
     # Initialise column headers and empty row
-    table_col = ["Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
-    empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
+    table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
+    empty = ["...", "...", "...", "...", "...", "...", "...", "...", "..."]
 
 
     # If no filtered incidents, display empty table
@@ -213,7 +257,6 @@ else:
 
         edited_df = st.data_editor(df, use_container_width=True, key="filtered_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
                                                                                                   # and also allows checkboxes in tables
-
         # Detect checked rows
         checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
@@ -260,14 +303,14 @@ else:
     st.pydeck_chart(pdk.Deck(
         layers=[layer],
         initial_view_state=view_state,
-        map_style="mapbox://styles/mapbox/streets-v11", # Streetview selected
+        map_style="mapbox://styles/mapbox/streets-v11", # Streetview selected TODO: choose a map style that makes it easier to see the coloured dots
         tooltip=tooltip,
     ))
 
     ##### Table #####
     # Initialise column headers and empty row
-    table_col = ["Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
-    empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
+    table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority", "Status"]
+    empty = ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."]
 
     # If no validated incidents, display empty table
     if not st.session_state["validated"]:
@@ -282,11 +325,17 @@ else:
     df.index.name = "S/N" # Rename index column
     df = df.drop(columns=["Details"]) # Remove "Details" column 
 
-    # Add column for dispatching button
-    df["Dispatch"] = [False] * len(df)
+    df["View Details"] = [False] * len(df) # Add view details column
 
-    st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width
+    edited_df = st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+                                                                                                # and also allows checkboxes in tables
+    # Detect checked rows
+    checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
+    # If any checkbox is checked, update session state and rerun
+    if checked_index:
+        st.session_state["selected_validated"] = checked_index[0]
+        st.rerun()
 
 
 # TODO
