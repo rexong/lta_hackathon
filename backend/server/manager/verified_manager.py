@@ -35,7 +35,7 @@ class VerifiedManager:
         return self.storage.create(
             verified_event.crowdsource_event, 
             verified_event.image_event,
-            verified_event.speed_event,
+            verified_event.speed_events,
             verified_event.is_unique,
             verified_event.priority_score
         )
@@ -59,10 +59,10 @@ if __name__ == "__main__":
     }
     from backend.schema.crowdsource_event import CrowdsourceEvent
     crowdsource_event = CrowdsourceEvent(**data)
-    speed_event = None
+    speed_events = None
     image_event = None
 
-    event = Event(0, crowdsource_event, image_event, speed_event)
+    event = Event(0, crowdsource_event, image_event, speed_events)
 
     verified_event = manager.add_verified_event(event)
     print(verified_event)

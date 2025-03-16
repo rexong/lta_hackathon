@@ -48,12 +48,12 @@ class FilteredManager:
         logger.info("Filtered Storage: Adding unique event")
         crowdsource_event = event_from_crowdsource.crowdsource_event
         image_event = event_from_crowdsource.image_event
-        speed_event = event_from_crowdsource.speed_event
+        speed_events = event_from_crowdsource.speed_events
         priority_score = self.__calculate_priority_score(event_from_crowdsource)
         filtered_event = self.storage.create(
             crowdsource_event,
             image_event,
-            speed_event,
+            speed_events,
             True,
             priority_score
         )

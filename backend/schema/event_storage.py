@@ -1,7 +1,7 @@
 from backend.schema.event import Event
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
-from backend.schema.speed_event import SpeedEvent
+from backend.schema.speed_event import SpeedEvents
 
 class EventStorage:
     def __init__(self):
@@ -12,7 +12,7 @@ class EventStorage:
         self, 
         crowdsource_event: CrowdsourceEvent,
         image_event: ImageEvent = None,
-        speed_event: SpeedEvent = None,
+        speed_events: SpeedEvents = None,
         is_unique = False,
         priority_score = -1
     ):
@@ -21,7 +21,7 @@ class EventStorage:
             event_id,
             crowdsource_event,
             image_event,
-            speed_event,
+            speed_events,
             is_unique,
             priority_score,
             []
