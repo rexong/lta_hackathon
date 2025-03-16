@@ -24,7 +24,7 @@ def get_traffic_speed():
 def get_traffic_image():
     lat = request.args.get("lat", type=float)
     long = request.args.get("long", type=float)
-    street = request.args.get("street", "")
+    street = request.args.get("street", "").lower()
 
     data = pd.read_csv(os.path.join(data_path, "Traffic_Images.csv"))
     if street == "tampines ave 10":
