@@ -36,4 +36,19 @@ To test out `backend/client.py`,
 > python backend/client.py
 3. Then run the simulation. 
 
+## Verifying Events
+To send a verified event to our own backend, use the `/event/verified` endpoint with the `POST` method.
+For the request body, pass in the event dictionary with the following structure:
+```
+{
+    "id": this `id` is just a placeholder with no actual use,
+    "crowdsource_event": dictionary form of crowdsource event,
+    "speed_events": dictionary form of speed events,
+    "image_event": dictionary form of image event
+    "priority_score": priority score,
+    "is_unique": is unique,
+    "repeated_events_crowdsource_id": list of repeated events crowdsource id
+}
+```
+
 
