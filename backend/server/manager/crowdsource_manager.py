@@ -2,10 +2,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import requests
 from backend.schema.event_storage import EventStorage
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
-from backend.schema.speed_event import SpeedEvent
+from backend.schema.speed_event import SpeedEvent, SpeedEvents
 
 class CrowdsourceManager:
     _instance = None
@@ -52,12 +53,12 @@ class CrowdsourceManager:
             reliability, 
             alert_subtype
         )
-        image_event = self.__get_image_event(x, y)
-        speed_event = self.__get_speed_event(x, y)
+        image_event = self.__get_image_event(x, y, street)
+        speed_events = self.__get_speed_events(x, y, street)
         event = self.storage.create(
             crowdsource_event,
             image_event,
-            speed_event
+            speed_events
         )
         self.queue.append(event.id)
         self.filtered_manager.notify(event.id)
@@ -76,15 +77,35 @@ class CrowdsourceManager:
         logger.info("Crowdsource Storage: Deleting one event")
         return self.storage.delete(event_id)
     
-    #TODO
-    def __get_image_event(self, x, y) -> ImageEvent:
+    def __get_image_event(self, x, y, street) -> ImageEvent:
         logger.info("Crowdsource Storage: Retrieving Images")
-        return None
+        url = "http://localhost:8000/traffic_image"
+        params = {
+            "lat": y,
+            "long": x,
+            "street": street
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            image_event = ImageEvent(data["camera_id"], x, y, data["image_src"])
+            return image_event 
 
-    #TODO
-    def __get_speed_event(self, x, y) -> SpeedEvent:
+    def __get_speed_events(self, x, y, street) -> SpeedEvents:
         logger.info("Crowdsource Storage: Retrieving Speed")
-        return None
+        speed_events = SpeedEvents()
+        url = "http://localhost:8000/traffic_speed"
+        params = {
+            "lat": y,
+            "long": x,
+            "street": street
+        }
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            for _, value in data.items():
+                speed_events.add(SpeedEvent(value["past_week_avg_speed"], value["current_avg_speed"]))
+            return speed_events 
 
 if __name__ == "__main__":
     manager = CrowdsourceManager()
