@@ -8,6 +8,10 @@ from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
 from backend.schema.speed_event import SpeedEvent, SpeedEvents
 
+EXTERNAL_DATA_URL = "http://localhost:8000"
+TRAFFIC_IMAGE_URI = "traffic_image"
+TRAFFIC_SPEED_URI = "traffic_speed"
+
 class CrowdsourceManager:
     _instance = None
     def __new__(cls):
@@ -79,7 +83,7 @@ class CrowdsourceManager:
     
     def __get_image_event(self, x, y, street) -> ImageEvent:
         logger.info("Crowdsource Storage: Retrieving Images")
-        url = "http://localhost:8000/traffic_image"
+        url = f"{EXTERNAL_DATA_URL}/{TRAFFIC_IMAGE_URI}"
         params = {
             "lat": y,
             "long": x,
@@ -94,7 +98,7 @@ class CrowdsourceManager:
     def __get_speed_events(self, x, y, street) -> SpeedEvents:
         logger.info("Crowdsource Storage: Retrieving Speed")
         speed_events = SpeedEvents()
-        url = "http://localhost:8000/traffic_speed"
+        url = f"{EXTERNAL_DATA_URL}/{TRAFFIC_SPEED_URI}"
         params = {
             "lat": y,
             "long": x,
