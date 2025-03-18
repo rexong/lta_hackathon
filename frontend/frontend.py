@@ -209,150 +209,200 @@ def main():
     else:
         st.title("🚦Traffic Incident Validator")
 
-        ####################################################
-        ##### Table 1: Incoming Incidents (unfiltered) #####
-        # TODO: table styles e.g. bolded headers or wtv
-        st.header("📨 Incoming Incidents")
+        # Working tab (filtered and validated incidents) and Archived tab (incoming incidents)
+        # TODO: style tabs
+        working, archived = st.tabs(["Working Incidents", "Archived Incidents"])
 
-        # Initialise column headers and empty row
-        table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details"]
-        empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
+        with working:
 
-        # If no incoming incidents, display empty table
-        if not st.session_state["incoming"]:
-            df = pd.DataFrame([empty],columns=table_col)
-            df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
+            ##### Map #####
 
-        else:
-            df = pd.DataFrame(st.session_state["incoming"])
-            df.columns = table_col # Rename columns  
-            df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
+            # Get colour of incident
+            def get_colour(incident):
+                if incident["type"] == "Filtered":
+                    if incident["priority"] == "High": # Return opaque red
+                        return [255, 0, 0, 255]
+                    elif incident["priority"] == "Medium":
+                        return [255, 165, 0, 255] # Return opaque orange
+                    else:
+                        return [255, 255, 0, 255] # Return opaque yellow
 
-        df.index.name = "S/N" # Rename index column
-        df = df.drop(columns=["Details"]) # Remove "Details" column  
-        st.data_editor(df, use_container_width=True, key="incoming_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width. 
-                                                                                      # Key to prevent streamlit.errors.StreamlitDuplicateElementId
-
-        # Filter button
-        #if st.button("Filter Incidents"):
-            #st.session_state["incoming_to_filter"] = st.session_state["incoming"] # Store incidents to filter, which will be sent to backend
-            #st.session_state["incoming"] = [] # Clear incoming data
-            #st.rerun()
+                elif incident["type"] == "Validated":
+                    opacity = 50
+                    if incident["priority"] == "High": # Return transluscent red
+                        return [255, 0, 0, opacity]
+                    elif incident["priority"] == "Medium":
+                        return [255, 165, 0, opacity] # Return transluscent orange
+                    else:
+                        return [255, 255, 0, opacity] # Return transluscent yellow
 
 
-        #######################################
-        ##### Table 2: Filtered Incidents #####
-        st.header("🔍 Filtered Incidents")
+            # Filtered incidents layer
+            data = pd.DataFrame(st.session_state["filtered"])
+            data["type"] = "Filtered" # Add a type column with "Filtered" as every value in that column
 
-        # Initialise column headers and empty row
-        table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
-        empty = ["...", "...", "...", "...", "...", "...", "...", "...", "..."]
+            data["colour"] = data.apply(get_colour, axis=1) # Add colour column based on the incident
+
+            filtered_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data,
+                get_position=["longitude", "latitude"],
+                get_color = "colour",
+                get_radius=200,
+                pickable=True,
+            )
+
+            # Validated incidents layer
+            # Create map markers with colour and radius
+            data = pd.DataFrame(st.session_state["validated"])
+            data["type"] = "Validated" # Add a type column with "Filtered" as every value in that column
+
+            data["colour"] = data.apply(get_colour, axis=1) # Add colour columnn based on the incident
+            
+            validated_layer = pdk.Layer(
+                "ScatterplotLayer", # Type of layer (scatterplot = markers)
+                data, # Data source
+                get_position=["longitude", "latitude"],
+                get_color="colour", # Red colour with transparency
+                get_radius=200, # Marker size
+                pickable=True, # Enable hovering to show tooltips
+            )
+
+            # Define tooltip
+            # TODO: different tooltip colours for different priorities?
+            tooltip = {
+                "html": "<b>Incident Subtype: {alert_subtype}", # Show alert subtype info
+                "style": {"color": "white", "backgroundColor": "black", "padding": "5px"} # Appearance of tooltip
+            }
+
+            # Controls where the map is centered, i.e. centered around Singapore
+            view_state = pdk.ViewState(
+                latitude=1.3521,
+                longitude=103.8198,
+                zoom=11, # Zoom level
+                min_zoom=10.5,
+                pitch=0, # No tilt
+            )
+
+            # Renders map
+            st.pydeck_chart(pdk.Deck(
+                layers=[filtered_layer, validated_layer],
+                initial_view_state=view_state,
+                map_style="mapbox://styles/mapbox/dark-v11", # Streetview selected TODO: choose a map style that makes it easier to see the coloured dots
+                tooltip=tooltip,
+            ))
 
 
-        # If no filtered incidents, display empty table
-        if not st.session_state["filtered"]:
-            df = pd.DataFrame([empty],columns=table_col)
-            df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
-            df.index.name = "S/N"
-            df = df.drop(columns=["Details"])
-            st.data_editor(df, use_container_width=True, key="filtered_incidents_editor")
+            #######################################
+            ##### Table 2: Filtered Incidents #####
+            st.header("🔍 Filtered Incidents")
 
-        else:
-            df = pd.DataFrame(st.session_state["filtered"])
-            df.columns = table_col # Rename columns  
-            df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
-        
-            df.index.name = "S/N" # Rename index column 
-            df = df.drop(columns=["Details"]) # Remove "Details" column  
+            # Initialise column headers and empty row
+            table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority"]
+            empty = ["...", "...", "...", "...", "...", "...", "...", "...", "..."]
 
-            # Create new column for checkbox to view details
-            # TODO: checkbox vs dropdown (dropdown can include other options e.g. view, approve, reject, etc.)
-            df["View Details"] = [False] * len(df)
 
-            edited_df = st.data_editor(df, use_container_width=True, key="filtered_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
-                                                                                                    # and also allows checkboxes in tables
+            # If no filtered incidents, display empty table
+            if not st.session_state["filtered"]:
+                df = pd.DataFrame([empty],columns=table_col)
+                df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
+                df.index.name = "S/N"
+                df = df.drop(columns=["Details"])
+                st.data_editor(df, use_container_width=True, key="filtered_incidents_editor")
+
+            else:
+                df = pd.DataFrame(st.session_state["filtered"])
+                df.columns = table_col # Rename columns  
+                df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
+            
+                df.index.name = "S/N" # Rename index column 
+                df = df.drop(columns=["Details"]) # Remove "Details" column  
+
+                # Create new column for checkbox to view details
+                # TODO: checkbox vs dropdown (dropdown can include other options e.g. view, approve, reject, etc.)
+                df["View Details"] = [False] * len(df)
+
+                edited_df = st.data_editor(df, use_container_width=True, key="filtered_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+                                                                                                        # and also allows checkboxes in tables
+                # Detect checked rows
+                checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
+
+                # If any checkbox is checked, update session state and rerun
+                if checked_index:
+                    st.session_state["selected_filtered"] = checked_index[0]
+                    st.rerun()
+
+
+            ########################################
+            ##### Table 3: Validated Incidents #####
+            st.header("✅ Validated Incidents")
+
+            ##### Table #####
+            # Initialise column headers and empty row
+            table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority", "Status"]
+            empty = ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."]
+
+            # If no validated incidents, display empty table
+            if not st.session_state["validated"]:
+                df = pd.DataFrame([empty],columns=table_col)
+                df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
+
+            else:
+                df = pd.DataFrame(st.session_state["validated"])
+                df.columns = table_col # Rename columns  
+                df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
+
+            df.index.name = "S/N" # Rename index column
+            df = df.drop(columns=["Details"]) # Remove "Details" column 
+
+            df["View Details"] = [False] * len(df) # Add view details column
+
+            edited_df = st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+                                                                                                        # and also allows checkboxes in tables
             # Detect checked rows
             checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
             # If any checkbox is checked, update session state and rerun
             if checked_index:
-                st.session_state["selected_filtered"] = checked_index[0]
+                st.session_state["selected_validated"] = checked_index[0]
                 st.rerun()
-
-
-        ########################################
-        ##### Table 3: Validated Incidents #####
-        st.header("✅ Validated Incidents")
-
-        ##### Map #####
-        data = pd.DataFrame(st.session_state["validated"])
         
-        # Create map markers with colour and radius
-        layer = pdk.Layer(
-            "ScatterplotLayer", # Type of layer (scatterplot = markers)
-            data, # Data source
-            get_position=["longitude", "latitude"],
-            get_color=[255, 0, 0, 160], # Red colour with transparency
-            get_radius=200, # Marker size
-            pickable=True, # Enable hovering to show tooltips
-        )
+            # Trademark 
+            st.markdown("<p style='text-align: center;'>© 2025 OptiMove AI™.</p>", unsafe_allow_html=True)
 
-        # Define tooltip
-        # TODO: different tooltip colours for different priorities?
-        tooltip = {
-            "html": "<b>Incident Subtype: {alert_subtype}", # Show alert subtype info
-            "style": {"color": "white", "backgroundColor": "black", "padding": "5px"} # Appearance of tooltip
-        }
+        with archived:
+            ####################################################
+            ##### Table 1: Incoming Incidents (unfiltered) #####
+            # TODO: table styles e.g. bolded headers or wtv
+            st.header("📨 Incoming Incidents")
 
-        # Controls where the map is centered, i.e. centered around Singapore
-        view_state = pdk.ViewState(
-            latitude=1.3521,
-            longitude=103.8198,
-            zoom=11, # Zoom level
-            min_zoom=10.5,
-            pitch=0, # No tilt
-        )
+            # Initialise column headers and empty row
+            table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details"]
+            empty = ["...", "...", "...", "...", "...", "...", "...", "..."]
 
-        # Renders map
-        st.pydeck_chart(pdk.Deck(
-            layers=[layer],
-            initial_view_state=view_state,
-            map_style="mapbox://styles/mapbox/dark-v11", # Streetview selected TODO: choose a map style that makes it easier to see the coloured dots
-            tooltip=tooltip,
-        ))
+            # If no incoming incidents, display empty table
+            if not st.session_state["incoming"]:
+                df = pd.DataFrame([empty],columns=table_col)
+                df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
 
-        ##### Table #####
-        # Initialise column headers and empty row
-        table_col = ["ID", "Longitude", "Latitude", "Road Name", "Date & Time", "Incident Type", "Incident Subtype", "Details", "Priority", "Status"]
-        empty = ["...", "...", "...", "...", "...", "...", "...", "...", "...", "..."]
+            else:
+                df = pd.DataFrame(st.session_state["incoming"])
+                df.columns = table_col # Rename columns  
+                df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
 
-        # If no validated incidents, display empty table
-        if not st.session_state["validated"]:
-            df = pd.DataFrame([empty],columns=table_col)
-            df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
+            df.index.name = "S/N" # Rename index column
+            df = df.drop(columns=["Details"]) # Remove "Details" column  
+            st.data_editor(df, use_container_width=True, key="incoming_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width. 
+                                                                                        # Key to prevent streamlit.errors.StreamlitDuplicateElementId
 
-        else:
-            df = pd.DataFrame(st.session_state["validated"])
-            df.columns = table_col # Rename columns  
-            df.index = range(1, len(df) + 1) # Initialise serial number column to be one-indexed
+            # Filter button
+            #if st.button("Filter Incidents"):
+                #st.session_state["incoming_to_filter"] = st.session_state["incoming"] # Store incidents to filter, which will be sent to backend
+                #st.session_state["incoming"] = [] # Clear incoming data
+                #st.rerun()
 
-        df.index.name = "S/N" # Rename index column
-        df = df.drop(columns=["Details"]) # Remove "Details" column 
 
-        df["View Details"] = [False] * len(df) # Add view details column
 
-        edited_df = st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
-                                                                                                    # and also allows checkboxes in tables
-        # Detect checked rows
-        checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
-
-        # If any checkbox is checked, update session state and rerun
-        if checked_index:
-            st.session_state["selected_validated"] = checked_index[0]
-            st.rerun()
-    
-        # Trademark 
-        st.markdown("<p style='text-align: center;'>© 2025 OptiMove AI™.</p>", unsafe_allow_html=True)
 
 
     # TODO
