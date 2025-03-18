@@ -350,6 +350,9 @@ def main():
         if checked_index:
             st.session_state["selected_validated"] = checked_index[0]
             st.rerun()
+    
+        # Trademark 
+        st.markdown("<p style='text-align: center;'>© 2025 OptiMove AI™.</p>", unsafe_allow_html=True)
 
 
     # TODO
