@@ -153,6 +153,7 @@ def main():
 
         col1, col2, col3 = st.columns([1, 1, 1,]) # Initialise 3 columns
         if col1.button("✅ Approve"): # If incident approved, then add to incidents to be given priority assignment
+            incident["status"] = "❌ Undispatched" # Add default undispatched status
             st.session_state["validated"].append(incident)
             st.session_state["filtered"].remove(incident)
             st.session_state["selected_filtered"] = None
@@ -171,13 +172,65 @@ def main():
     elif st.session_state["selected_validated"]:
         incident = st.session_state["validated"][st.session_state["selected_validated"] - 1]
 
-        st.title("📌Incident Details")
-        st.subheader("S/N xx")
-        st.write(f"**Road Name:** {incident['road_name']}")
-        st.write(f"**Date & Time:** {incident['date_time']}")
-        st.write(f"**Incident Type:** {incident['alert_type']}")
-        st.write(f"**Incident Subtype:** {incident['alert_subtype']}")
-        st.write(f"**Details:** {incident['details']}")
+        st.title(f"📌S/N {incident["id"]}")
+
+        # Inject CSS for table styling
+        st.markdown("""
+            <style>
+                .incident-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                    font-size: 18px;
+                    text-align: left;
+                }
+                .incident-table th, .incident-table td {
+                    padding: 12px;
+                    border-bottom: 1px solid #ddd;
+                }
+                .incident-table th {
+                    background-color: #004488;
+                    color: white;
+                    font-weight: bold;
+                }
+                .incident-table tr:hover {
+                    background-color: #f1f1f1;
+                }
+                .incident-table td:first-child {
+                    font-weight: bold;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Display the table using HTML inside `st.markdown()`
+        st.markdown(f"""
+            <table class="incident-table">
+                <tr>
+                    <th>Field</th>
+                    <th>Information</th>
+                </tr>
+                <tr>
+                    <td>🚗 Road Name</td>
+                    <td>{incident["road_name"]}</td>
+                </tr>
+                <tr>
+                    <td>⏰ Date & Time</td>
+                    <td>{incident["date_time"]}</td>
+                </tr>
+                <tr>
+                    <td>⚠️ Incident Type</td>
+                    <td>{incident["alert_type"]}</td>
+                </tr>
+                <tr>
+                    <td>📌 Incident Subtype</td>
+                    <td>{incident["alert_subtype"]}</td>
+                </tr>
+                <tr>
+                    <td>📝 Details</td>
+                    <td>{incident["details"]}</td>
+                </tr>
+            </table>
+        """, unsafe_allow_html=True)
 
         # TODO:
         # If incident is undispatched  
@@ -209,13 +262,25 @@ def main():
     else:
         st.title("🚦Traffic Incident Validator")
 
+        # Different coloured cell depending on priority level
+        def highlight_priority(priority):
+            if priority == "High":
+                return "background-color: red; color: black;"
+            elif priority == "Medium":
+                return "background-color: orange; color: black;"
+            elif priority == "Low":
+                return "background-color: yellow; color: black;"
+
         # Working tab (filtered and validated incidents) and Archived tab (incoming incidents)
         # TODO: style tabs
         working, archived = st.tabs(["Working Incidents", "Archived Incidents"])
 
+
+        # Filtered and Validated Incidents
         with working:
 
             ##### Map #####
+            # Display filtered and validated incidents
 
             # Get colour of incident
             def get_colour(incident):
@@ -305,10 +370,9 @@ def main():
             # If no filtered incidents, display empty table
             if not st.session_state["filtered"]:
                 df = pd.DataFrame([empty],columns=table_col)
-                df.index = ["🚨 No Records Found"] # Initialise serial number value as default value
-                df.index.name = "S/N"
-                df = df.drop(columns=["Details"])
-                st.data_editor(df, use_container_width=True, key="filtered_incidents_editor")
+                df["S/N"] = ["🚨 No Records Found"] # Initialise serial number value as default value
+                df = df[["S/N"] + table_col] # Reorder columns
+                st.data_editor(df, use_container_width=True, key="filtered_incidents_editor", disabled=["S/N"] + table_col, hide_index=True)
 
             else:
                 df = pd.DataFrame(st.session_state["filtered"])
@@ -322,8 +386,11 @@ def main():
                 # TODO: checkbox vs dropdown (dropdown can include other options e.g. view, approve, reject, etc.)
                 df["View Details"] = [False] * len(df)
 
-                edited_df = st.data_editor(df, use_container_width=True, key="filtered_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
-                                                                                                        # and also allows checkboxes in tables
+                styled_df = df.style.applymap(highlight_priority, subset=["Priority"]) # Apply colour
+
+                edited_df = st.data_editor(styled_df, use_container_width=True, key="filtered_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+                                                                                                                                     # and also allows checkboxes in tables
+                                                                                                                                     # Disable all columns
                 # Detect checked rows
                 checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
@@ -357,8 +424,10 @@ def main():
 
             df["View Details"] = [False] * len(df) # Add view details column
 
-            edited_df = st.data_editor(df, use_container_width=True, key="validated_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width, 
-                                                                                                        # and also allows checkboxes in tables
+            styled_df = df.style.applymap(highlight_priority, subset=["Priority"])
+
+            edited_df = st.data_editor(styled_df, use_container_width=True, key="validated_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+                                                                                                                                  # and also allows checkboxes in tables
             # Detect checked rows
             checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
@@ -392,7 +461,7 @@ def main():
 
             df.index.name = "S/N" # Rename index column
             df = df.drop(columns=["Details"]) # Remove "Details" column  
-            st.data_editor(df, use_container_width=True, key="incoming_incidents_editor") # Display table. Used over st.dataframe because this handles adjusting to the column width. 
+            st.data_editor(df, use_container_width=True, key="incoming_incidents_editor", disabled=df.columns.tolist()) # Display table. Used over st.dataframe because this handles adjusting to the column width. 
                                                                                         # Key to prevent streamlit.errors.StreamlitDuplicateElementId
 
             # Filter button
