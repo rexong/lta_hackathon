@@ -80,15 +80,13 @@ h1 {
 }
 
 /* st.header style */
+/* TODO: padding top */
 h2 {
     color: #0056b3 !important;
     text-align: center;
     font-size: 26px !important;
     font-weight: bold;
-    padding-bottom: 8px;
-    border-bottom: 4px solid #0072ff;
 }
-
 
 /* TAB STYLES */
 /* Center the tabs */
@@ -151,9 +149,169 @@ h2 {
 
 /* MAP STYLES */
 /* STYLE THE PYDECK MAP CONTAINER */
-.stDeckGlJsonChart {
-    border: 10px solid #0072ff !important; /* Blue border to match tabs */
-    border-radius: 12px !important; /* Rounded corners like buttons & tabs */
+.st-key-pydeck_map {
+    border: 3px solid #0072ff !important; /* Blue border */
+    border-radius: 12px !important; /* Rounded corners */
     padding: 10px !important;
-    border-bottom: 100px solid #0072ff !important; /* Figure this out */
+    background: #f0f2f6 !important; /* Light grey background */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2) !important; /* Soft shadow */    
+}
+
+
+/* THEMED INCIDENT TABLE */
+.incident-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 18px;
+    text-align: center;
+    background-color: #ffffff;         /* White background for contrast */
+    border: 3px solid #0072ff;         /* Blue border to match theme */
+    border-radius: 12px;               /* Rounded corners */
+    overflow: hidden;                  /* Clip rounded corners for rows */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+/* Header row */
+.incident-table th {
+    background-color: #004488;         /* Deep blue header */
+    color: white;
+    font-weight: bold;
+    padding: 14px;
+}
+
+/* Table cells */
+.incident-table td {
+    padding: 14px;
+    border-bottom: 1px solid #e0e0e0;  /* Light row divider */
+    color: #333333;                    /* Match global text colour */
+}
+
+
+/* Hover effect */
+.incident-table tr:hover {
+    background-color: #f0f2f6;         /* Match theme's light grey */
+    transition: background 0.2s ease-in-out;
+}
+
+/* Approve box */
+.st-key-approve {
+    border: 3px solid #0072ff !important; /* Blue border */
+    border-radius: 12px !important; /* Rounded corners */
+    padding: 15px !important;
+    background: #D6E4F0 !important; /* Light grey background */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2) !important; /* Soft shadow */
+    margin-top: 10px !important;
+}
+
+/* Centralise */
+.st-key-checkboxes {
+    width: 10;
+    justify-content: center;
+    margin: auto;
+}
+
+/* Centralise approve button */
+.st-key-approve_button {
+    justify-content: center;
+    margin: auto;
+}
+
+/* Centralise reject button */
+.st-key-reject_button {
+    display: block;
+    margin-left: auto; /* Pushes the button as far to the right as the container allows. */
+    margin-right: 0;
+    margin-top: 5em;
+}
+
+/* Centralise back button */
+.st-key-back_button {
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+    margin-top: 5em; /* You can adjust this for vertical alignment */
+}
+
+/* Centralise dispatch button */
+.st-key-dispatch_button {
+    display: block;
+    margin-right: auto;
+    margin-left: 0;
+    margin-top: 5em; /* You can adjust this for vertical alignment */
+}
+
+
+.st-key-filtered_cont {
+    border: 3px solid #0072ff;
+    border-radius: 12px !important;            /* Rounded corners */
+    padding: 25px !important;                  /* Inner spacing */
+    background: #F0F2F6 !important;            /* Light background to contrast with table text */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15) !important; /* Soft shadow for depth */
+    margin-top: 20px !important;
+    margin-bottom: 40px !important;
+}
+
+
+.st-key-filtered_incidents_editor {
+    max-width: 100% !important;
+    overflow-x: hidden !important; /* Prevent flickering scrollbars */
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 20px;
+    box-sizing: border-box !important;
+    /* 🔷 Border on all sides */
+    border: 3px solid black;         /* Matching your Streamlit blue */
+    border-radius: 12px;               /* Rounded corners for card-style look */
+    background-color: #FFFFFF;         /* contrast background */
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* soft shadow */
+
+}
+
+.st-key-validated_cont {
+    border: 3px solid #0072ff;
+    border-radius: 12px !important;            /* Rounded corners */
+    padding: 25px !important;                  /* Inner spacing */
+    background: #F0F2F6 !important;            /* Light background to contrast with table text */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15) !important; /* Soft shadow for depth */
+    margin-top: 20px !important;
+    margin-bottom: 40px !important;   
+}
+
+.st-key-validated_incidents_editor {
+    max-width: 100% !important;
+    overflow-x: hidden !important; /* Prevent flickering scrollbars */
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 20px;
+    box-sizing: border-box !important;
+    /* 🔷 Border on all sides */
+    border: 3px solid black;         
+    border-radius: 12px;               /* Rounded corners for card-style look */
+    background-color: #FFFFFF;         /* contrast background */
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* soft shadow */    
+}
+
+.st-key-incoming_cont {
+    border: 3px solid #0072ff;
+    border-radius: 12px !important;            /* Rounded corners */
+    padding: 25px !important;                  /* Inner spacing */
+    background: #F0F2F6 !important;            /* Light background to contrast with table text */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15) !important; /* Soft shadow for depth */
+    margin-top: 20px !important;
+    margin-bottom: 40px !important;   
+}
+
+.st-key-incoming_incidents_editor {
+    max-width: 100% !important;
+    overflow-x: hidden !important; /* Prevent flickering scrollbars */
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 20px;
+    box-sizing: border-box !important;
+    /* 🔷 Border on all sides */
+    border: 3px solid black;         
+    border-radius: 12px;               /* Rounded corners for card-style look */
+    background-color: #FFFFFF;         /* contrast background */
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); /* soft shadow */    
 }
