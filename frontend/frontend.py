@@ -199,6 +199,35 @@ def convert_img(dir, width=200):
     return f'<img src="data:image/png;base64,{img_base64}" width="{width}"/>'
 
 
+# Different coloured cell in homescreen table depending on priority level
+def highlight_priority(priority):
+    if priority == "High":
+        return "background-color: red; color: black;"
+    elif priority == "Medium":
+        return "background-color: orange; color: black;"
+    else:
+        return "background-color: yellow; color: black;"
+
+
+# Get colour of cell in details table depending on priority score
+def get_colour(incident):
+    if incident["priority"] == "High":
+        return "#FF0000"  # red
+    elif incident["priority"] == "Medium":
+        return "#FFA500"  # orange
+    else:
+        return "#FFD700"  # yellow
+
+
+# Bin priorities based on their score
+def bin_priority(score):
+    if score >= 0.7:
+        return "High"
+    elif 0.29 < score < 0.69:
+        return "Medium"
+    else:
+        return "Low"
+    
 # Displays details of a filtered incident
 def display_filtered_incident_details():
         incident = st.session_state["filtered"][st.session_state["selected_filtered"] - 1] # Retrieve specific incident checked. Minus one to account for overcounting due to the row of column headers being included
@@ -219,7 +248,8 @@ def display_filtered_incident_details():
                 ),
                 "camera_id": incident["image_event"]["camera_id"],
                 "image_src": convert_img(f"../{incident["image_event"]["image_src"]}", width=500), # Convert to base64
-                "priority": incident["priority_score"],
+                "number_of_similar": len(incident["repeated_events_crowdsource_id"]), # Number of reports on this incident including itself
+                "priority": bin_priority(incident["priority_score"]),
             }
 
         # Parses full json into dict with keys: id, street, timestamp, alert_type, alert_subtype, priority
@@ -233,22 +263,14 @@ def display_filtered_incident_details():
                                 if data["crowdsource_event"]["alert_subtype"] is not None
                                 else "Unknown"
                 ),
-                "priority": data["priority_score"]
+                "priority": bin_priority(data["priority_score"])
             }
 
-        parsed_incident = parse_incident(incident)
-        parsed_filtered = parse_filtered(incident)
+        parsed_incident = parse_incident(incident) # Used for displaying the incident in the table
+        parsed_filtered = parse_filtered(incident) # Used for removing this incident from the "parsed_filtered" session state
 
         st.title(f"📌ID {incident["id"]}")
 
-        # Get colour of cell depending on priority score
-        def get_colour(incident):
-            if incident["priority"] > 0.7:
-                return "#FA5252"  # red
-            elif 0.3 < incident["priority"] <= 0.7:
-                return "#FD7E14"  # orange
-            else:
-                return "#FAB005"  # yellow
             
         priority_colour = get_colour(parsed_incident)
 
@@ -297,9 +319,13 @@ def display_filtered_incident_details():
                     <td>{parsed_incident["camera_id"]}</td>
                 </tr>
                 <tr>
+                    <td>📢 Number of Similar Reports</td>
+                    <td>{parsed_incident["number_of_similar"]}</td>
+                </tr>
+                <tr>
                     <td>🔥 Priority Score</td>
                     <td style='color: white; background-color: {priority_colour}; font-weight: bold; padding: 6px 10px; border-radius: 6px; text-align: center;'>
-                        {parsed_incident["priority"]:.2f}
+                        {parsed_incident["priority"]}
                     </td>
                 </tr>
             </table>
@@ -344,6 +370,8 @@ def display_filtered_incident_details():
                     st.session_state["selected_filtered"] = None
                     st.rerun() 
 
+        display_trademark()
+
 
 def display_validated_incident_details():
         incident = st.session_state["validated"][st.session_state["selected_validated"] - 1] # Retrieve specific incident checked. Minus one to account for overcounting due to the row of column headers being included
@@ -364,35 +392,12 @@ def display_validated_incident_details():
                 ),
                 "camera_id": incident["image_event"]["camera_id"],
                 "image_src": convert_img(f"../{incident["image_event"]["image_src"]}", width=500), # Convert to base64
-                "priority": incident["priority_score"],
+                "number_of_similar": len(incident["repeated_events_crowdsource_id"]), # Number of reports similar to this incident
+                "priority": bin_priority(incident["priority_score"]),
                 "status": incident["status"]
             }
 
-        # Parses full json into dict with keys: id, street, timestamp, alert_type, alert_subtype, priority
-        def parse_validated(data):
-            return {
-                "id": data["id"],
-                "street": data["crowdsource_event"]["street"],
-                "timestamp": convert_unix(data["crowdsource_event"]["timestamp"]),
-                "alert_type": data["crowdsource_event"]["alert_type"].replace("_", " ").capitalize(),
-                "alert_subtype": (data["crowdsource_event"]["alert_subtype"].replace("_", " ").capitalize() # Handles null value
-                                if data["crowdsource_event"]["alert_subtype"] is not None
-                                else "Unknown"
-                ),
-                "priority": data["priority_score"],
-                "status": data["status"]
-            }
-
         parsed_incident = parse_incident(incident)
-
-        # Get colour of cell depending on priority score
-        def get_colour(incident):
-            if incident["priority"] > 0.7:
-                return "#FA5252"  # red
-            elif 0.3 < incident["priority"] <= 0.7:
-                return "#FD7E14"  # orange
-            else:
-                return "#FAB005"  # yellow
             
         priority_colour = get_colour(parsed_incident)
 
@@ -442,9 +447,13 @@ def display_validated_incident_details():
                     <td>{parsed_incident["camera_id"]}</td>
                 </tr>
                 <tr>
+                    <td>📢 Number of Similar Reports</td>
+                    <td>{parsed_incident["number_of_similar"]}</td>
+                </tr>
+                <tr>
                     <td>🔥 Priority Score</td>
                     <td style='color: white; background-color: {priority_colour}; font-weight: bold; padding: 6px 10px; border-radius: 6px; text-align: center;'>
-                        {parsed_incident["priority"]:.2f}
+                        {parsed_incident["priority"]}
                     </td>
                 </tr>
                 <tr>
@@ -527,158 +536,8 @@ def display_validated_incident_details():
                     st.session_state["selected_validated"] = None
                     st.rerun()
 
-if "init_dummy" not in st.session_state:
-    st.session_state["init_dummy"] = False
+        display_trademark()
 
-if not st.session_state["init_dummy"]:
-    ########################## DUMMY DATA
-    st.session_state["filtered"] = [
-        {
-        "crowdsource_event": {
-            "alert_subtype": None,
-            "alert_type": "ACCIDENT",
-            "reliability": 6,
-            "street": "Tampines Ave 10",
-            "timestamp": 1742476842.4073632,
-            "town": "Tampines",
-            "x": 103.928405,
-            "y": 1.354571
-        },
-        "id": 1,
-        "image_event": {
-            "camera_id": 7793,
-            "image_src": "data/car_accident.png"
-        },
-        "is_unique": True,
-        "priority_score": 0.65000000,
-        "repeated_events_crowdsource_id": [
-            2
-        ],
-        "speed_events": [
-            {
-            "current_avg_speed": 4,
-            "past_week_avg_speed": 20.4
-            },
-            {
-            "current_avg_speed": 5,
-            "past_week_avg_speed": 17.4
-            },
-            {
-            "current_avg_speed": 42,
-            "past_week_avg_speed": 45.0
-            },
-            {
-            "current_avg_speed": 30,
-            "past_week_avg_speed": 30.0
-            },
-            {
-            "current_avg_speed": 50,
-            "past_week_avg_speed": 43.4
-            },
-            {
-            "current_avg_speed": 55,
-            "past_week_avg_speed": 54.4
-            }
-        ]
-        },
-        {
-        "crowdsource_event": {
-            "alert_subtype": "HAZARD_ON_SHOULDER_CAR_STOPPED",
-            "alert_type": "HAZARD",
-            "reliability": 7,
-            "street": "Clementi Ave 6",
-            "timestamp": 1742486366.1760848,
-            "town": "Clementi",
-            "x": 103.762467,
-            "y": 1.317637
-        },
-        "id": 2,
-        "image_event": {
-            "camera_id": 4714,
-            "image_src": "data/car_road_shoulder.png"
-        },
-        "is_unique": True,
-        "priority_score": 0.250000003,
-        "repeated_events_crowdsource_id": [],
-        "speed_events": [
-            {
-            "current_avg_speed": 21,
-            "past_week_avg_speed": 20.4
-            },
-            {
-            "current_avg_speed": 18,
-            "past_week_avg_speed": 17.4
-            },
-            {
-            "current_avg_speed": 42,
-            "past_week_avg_speed": 45.0
-            },
-            {
-            "current_avg_speed": 29,
-            "past_week_avg_speed": 30.0
-            },
-            {
-            "current_avg_speed": 50,
-            "past_week_avg_speed": 43.4
-            },
-            {
-            "current_avg_speed": 55,
-            "past_week_avg_speed": 54.4
-            }
-        ]
-        },
-    ]
-
-    st.session_state["validated"] = [
-        {
-        "crowdsource_event": {
-            "alert_subtype": "HAZARD_ON_SHOULDER_CAR_STOPPED",
-            "alert_type": "HAZARD",
-            "reliability": 4,
-            "street": "CTE (AYE)",
-            "timestamp": 1742486371.224215,
-            "town": None,
-            "x": 103.839542,
-            "y": 1.286703
-        },
-        "id": 3,
-        "image_event": {
-            "camera_id": 1703,
-            "image_src": "data/car_normal.png"
-        },
-        "is_unique": True,
-        "priority_score": 0.2000005,
-        "repeated_events_crowdsource_id": [],
-        "speed_events": [
-            {
-            "current_avg_speed": 21,
-            "past_week_avg_speed": 20.4
-            },
-            {
-            "current_avg_speed": 18,
-            "past_week_avg_speed": 17.4
-            },
-            {
-            "current_avg_speed": 42,
-            "past_week_avg_speed": 45.0
-            },
-            {
-            "current_avg_speed": 29,
-            "past_week_avg_speed": 30.0
-            },
-            {
-            "current_avg_speed": 50,
-            "past_week_avg_speed": 43.4
-            },
-            {
-            "current_avg_speed": 55,
-            "past_week_avg_speed": 54.4
-            }
-        ],
-        "status": "❌ Undispatched",
-        }  
-    ]
-    st.session_state["init_dummy"] = True
 
 # Display map and filtered incidents table
 @st.fragment(run_every=3) # Fragment that reruns every 3 seconds to handle changes in session state i.e. new filtered incident
@@ -694,17 +553,17 @@ def display_map_and_filtered_incidents_table():
 
 
             if incident["type"] == "Filtered":
-                if 0.7 < incident["priority"] <= 1: 
+                if incident["priority"] == "High": 
                     url = "https://img.icons8.com/ios-filled/50/FA5252/google-web-search.png" # red magnifying glass
-                elif 0.3< incident["priority"] <= 0.7: 
+                elif incident["priority"] == "Medium": 
                     url = "https://img.icons8.com/ios-filled/50/FD7E14/google-web-search.png" # orange magnifying glass
                 else:
                     url = "https://img.icons8.com/ios-filled/50/FAB005/google-web-search.png" # yellow magnifying glass
 
             elif incident["type"] == "Validated":
-                if 0.7 < incident["priority"] <= 1: 
+                if incident["priority"] == "High": 
                     url = "https://img.icons8.com/ios-filled/50/FA5252/checked--v1.png" # red tick
-                elif 0.3< incident["priority"] <= 0.7:
+                elif incident["priority"] == "Medium":
                     url = "https://img.icons8.com/ios-filled/50/FD7E14/checked--v1.png" # orange tick
                 else:
                     url = "https://img.icons8.com/ios-filled/50/FAB005/checked--v1.png" # yellow tick
@@ -727,7 +586,7 @@ def display_map_and_filtered_incidents_table():
                                 if incident["crowdsource_event"]["alert_subtype"] is not None
                                 else "Unknown"
                                 ),
-                "priority": incident["priority_score"],
+                "priority": bin_priority(incident["priority_score"]),
             }
 
         # Filtered incidents layer
@@ -829,7 +688,7 @@ def display_map_and_filtered_incidents_table():
                                     if data["crowdsource_event"]["alert_subtype"] is not None
                                     else "Unknown"
                     ),
-                    "priority": data["priority_score"]
+                    "priority": bin_priority(data["priority_score"])
                 }
             
             # Clean up the data of st.session_state["filtered"]
@@ -863,15 +722,8 @@ def display_map_and_filtered_incidents_table():
 
             styled_df = df.style.map(highlight_priority, subset=["Priority Score"]) # Apply colour
 
-            # Handle floating point precision, from 0.700000 to 0.70
-            column_config = {
-                "Priority Score": st.column_config.NumberColumn(
-                    "Priority Score",
-                    format="%.2f"
-                )
-            }
 
-            edited_df = st.data_editor(styled_df, column_config=column_config, use_container_width=True, key="filtered_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+            edited_df = st.data_editor(styled_df, use_container_width=True, key="filtered_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
                                                                                                                                                                 # and also allows checkboxes in tables
                                                                                                                                                                 # Disable all columns
                                                                                                                                                                 # Height displays every row at once, instead of scrolling within the table
@@ -882,6 +734,7 @@ def display_map_and_filtered_incidents_table():
             if checked_index:
                 st.session_state["selected_filtered"] = checked_index[0]
                 st.rerun()
+
 
 ########################################
 ##### Table 3: Validated Incidents #####
@@ -915,7 +768,7 @@ def display_validated_incidents_table():
                                     if data["crowdsource_event"]["alert_subtype"] is not None
                                     else "Unknown"
                     ),
-                    "priority": data["priority_score"],
+                    "priority": bin_priority(data["priority_score"]),
                     "status": data["status"]
                 }
             
@@ -932,15 +785,7 @@ def display_validated_incidents_table():
 
             styled_df = df.style.map(highlight_priority, subset=["Priority Score"]) # Apply colour
 
-            # Handle floating point precision, from 0.700000 to 0.70
-            column_config = {
-                "Priority Score": st.column_config.NumberColumn(
-                    "Priority Score",
-                    format="%.2f"
-                )
-            }
-
-            edited_df = st.data_editor(styled_df, column_config=column_config, use_container_width=True, key="validated_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
+            edited_df = st.data_editor(styled_df, use_container_width=True, key="validated_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
                                                                                                                                                                 # and also allows checkboxes in tables
             # Detect checked rows
             checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
@@ -1013,15 +858,6 @@ def display_trademark():
     # Trademark 
     st.markdown("<p style='text-align: center;'>© 2025 OptiMove AI™.</p>", unsafe_allow_html=True)
 
-# Different coloured cell in table depending on priority level
-def highlight_priority(priority):
-    if 0.69 < priority <= 1:
-        return "background-color: red; color: black;"
-    elif 0.39 < priority <= 0.7:
-        return "background-color: orange; color: black;"
-    else:
-        return "background-color: yellow; color: black;"
-
 
 def main():
     st.set_page_config(layout="wide") # Enable full width mode
@@ -1048,7 +884,7 @@ def main():
 
     # If user does nothing i.e. view homescreen
     else:   
-        st.title("🚦Traffic Incident Validator")
+        st.title("🚦OptiMove AI™")
 
         # Working tab (filtered and validated incidents) and Archived tab (incoming incidents)
         working, archived = st.tabs(["Working Incidents", "Archived Incidents"])

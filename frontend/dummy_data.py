@@ -21,7 +21,7 @@ if not st.session_state["init_dummy"]:
             "image_src": "data/car_accident.png"
         },
         "is_unique": True,
-        "priority_score": 0.65,
+        "priority_score": 0.65000000,
         "repeated_events_crowdsource_id": [
             2
         ],
@@ -69,7 +69,7 @@ if not st.session_state["init_dummy"]:
             "image_src": "data/car_road_shoulder.png"
         },
         "is_unique": True,
-        "priority_score": 0.25,
+        "priority_score": 0.250000003,
         "repeated_events_crowdsource_id": [],
         "speed_events": [
             {
@@ -118,7 +118,7 @@ if not st.session_state["init_dummy"]:
             "image_src": "data/car_normal.png"
         },
         "is_unique": True,
-        "priority_score": 0.2,
+        "priority_score": 0.2000005,
         "repeated_events_crowdsource_id": [],
         "speed_events": [
             {
