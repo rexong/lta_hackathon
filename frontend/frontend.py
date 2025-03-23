@@ -537,7 +537,7 @@ def display_validated_incident_details():
                     st.rerun()
 
         display_trademark()
-
+        
 
 # Display map and filtered incidents table
 @st.fragment(run_every=3) # Fragment that reruns every 3 seconds to handle changes in session state i.e. new filtered incident
@@ -554,19 +554,19 @@ def display_map_and_filtered_incidents_table():
 
             if incident["type"] == "Filtered":
                 if incident["priority"] == "High": 
-                    url = "https://img.icons8.com/ios-filled/50/FA5252/google-web-search.png" # red magnifying glass
+                    url = "https://img.icons8.com/ios-filled/50/FF0000/google-web-search.png" # red magnifying glass
                 elif incident["priority"] == "Medium": 
-                    url = "https://img.icons8.com/ios-filled/50/FD7E14/google-web-search.png" # orange magnifying glass
+                    url = "https://img.icons8.com/ios-filled/50/FFA500/google-web-search.png" # orange magnifying glass
                 else:
-                    url = "https://img.icons8.com/ios-filled/50/FAB005/google-web-search.png" # yellow magnifying glass
+                    url = "https://img.icons8.com/ios-filled/50/FFD700/google-web-search.png" # yellow magnifying glass
 
             elif incident["type"] == "Validated":
                 if incident["priority"] == "High": 
-                    url = "https://img.icons8.com/ios-filled/50/FA5252/checked--v1.png" # red tick
+                    url = "https://img.icons8.com/ios-filled/50/FF0000/checked--v1.png" # red tick
                 elif incident["priority"] == "Medium":
-                    url = "https://img.icons8.com/ios-filled/50/FD7E14/checked--v1.png" # orange tick
+                    url = "https://img.icons8.com/ios-filled/50/FFA500/checked--v1.png" # orange tick
                 else:
-                    url = "https://img.icons8.com/ios-filled/50/FAB005/checked--v1.png" # yellow tick
+                    url = "https://img.icons8.com/ios-filled/50/FFD700/checked--v1.png" # yellow tick
 
             return {
                 "url": url,
@@ -705,6 +705,13 @@ def display_map_and_filtered_incidents_table():
 
             clean_filtered()
 
+            # Sort by higher to lower priority
+            st.session_state["filtered"] = sorted(
+                st.session_state["filtered"],
+                key=lambda x: x["priority_score"],
+                reverse=True,
+            )
+
             all_ids = [incident["id"] for incident in st.session_state["parsed_filtered"]] # Get all IDs currently in table
 
             for incident in st.session_state["filtered"]:
@@ -772,6 +779,12 @@ def display_validated_incidents_table():
                     "status": data["status"]
                 }
             
+            # Sort from higher to lower priority
+            st.session_state["validated"] = sorted(
+                st.session_state["validated"],
+                key=lambda x: x["priority_score"],
+                reverse=True,
+            )
 
             st.session_state["parsed_validated"] = [parse_validated(incident) for incident in st.session_state["validated"]]
             
