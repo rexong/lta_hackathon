@@ -128,8 +128,6 @@ def initialise_session_states():
 
 
 
-
-
 ##### API CALL TO BACKEND TO RETRIEVE INCOMING AND FILTERED DATA #####
 # Functions for listening and handling server-sent events from backend
 def listen_to_sse(uri):
@@ -209,7 +207,7 @@ def highlight_priority(priority):
         return "background-color: yellow; color: black;"
 
 
-# Get colour of cell in details table depending on priority score
+# Get colour of cell in details table depending on priority
 def get_colour(incident):
     if incident["priority"] == "High":
         return "#FF0000"  # red
@@ -269,7 +267,7 @@ def display_filtered_incident_details():
         parsed_incident = parse_incident(incident) # Used for displaying the incident in the table
         parsed_filtered = parse_filtered(incident) # Used for removing this incident from the "parsed_filtered" session state
 
-        st.title(f"📌ID {incident["id"]}")
+        st.title(f"📌 ID {incident["id"]}")
 
             
         priority_colour = get_colour(parsed_incident)
@@ -323,7 +321,7 @@ def display_filtered_incident_details():
                     <td>{parsed_incident["number_of_similar"]}</td>
                 </tr>
                 <tr>
-                    <td>🔥 Priority Score</td>
+                    <td>🔥 Priority</td>
                     <td style='color: white; background-color: {priority_colour}; font-weight: bold; padding: 6px 10px; border-radius: 6px; text-align: center;'>
                         {parsed_incident["priority"]}
                     </td>
@@ -401,7 +399,7 @@ def display_validated_incident_details():
             
         priority_colour = get_colour(parsed_incident)
 
-        st.title(f"📌ID {incident["id"]}")
+        st.title(f"📌 ID {incident["id"]}")
 
         # Display the table using HTML inside `st.markdown()`
         st.markdown(f"""
@@ -451,7 +449,7 @@ def display_validated_incident_details():
                     <td>{parsed_incident["number_of_similar"]}</td>
                 </tr>
                 <tr>
-                    <td>🔥 Priority Score</td>
+                    <td>🔥 Priority</td>
                     <td style='color: white; background-color: {priority_colour}; font-weight: bold; padding: 6px 10px; border-radius: 6px; text-align: center;'>
                         {parsed_incident["priority"]}
                     </td>
@@ -589,6 +587,21 @@ def display_map_and_filtered_incidents_table():
                 "priority": bin_priority(incident["priority_score"]),
             }
 
+
+        # For demo purposes
+        def hardcode_demo():
+            for incident in st.session_state["filtered"]:
+                # Hardcode priorities and unknown subtype
+                if incident["id"] == 1:
+                    incident["priority_score"] = 0.9
+                    incident["crowdsource_event"]["alert_subtype"] = "Accident major"
+                elif incident["id"] == 2:
+                    incident["priority_score"] = 0.5
+                else:
+                    incident["priority_score"] = 0.1
+
+        hardcode_demo()
+
         # Filtered incidents layer
         incidents = [parse_incident(incident) for incident in st.session_state["filtered"] if incident]
         data = pd.DataFrame(incidents)
@@ -664,7 +677,8 @@ def display_map_and_filtered_incidents_table():
         st.header("🔍 Filtered Incidents")
 
         # Initialise column headers and empty row
-        table_col = ["ID", "Street", "Date & Time", "Incident Type", "Incident Subtype", "Priority Score"]
+        table_col = ["ID", "Street", "Date & Time", "Incident Type", "Incident Subtype", "Priority"] 
+        table_col = ["📌 ID", "🛣️ Street", "⏰ Date & Time", "⚠️ Incident Type", "📌 Incident Subtype", "🔥 Priority"]
         empty = ["...", "...", "...", "...", "...", "..."]
 
         # If no filtered incidents, display empty table
@@ -725,9 +739,9 @@ def display_map_and_filtered_incidents_table():
             df.index.name = "S/N" # Rename index column 
 
             # Create new column for checkbox to view details
-            df["View Details"] = [False] * len(df)
+            df["🧾 View Details"] = [False] * len(df)
 
-            styled_df = df.style.map(highlight_priority, subset=["Priority Score"]) # Apply colour
+            styled_df = df.style.map(highlight_priority, subset=["🔥 Priority"]) # Apply colour
 
 
             edited_df = st.data_editor(styled_df, use_container_width=True, key="filtered_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
@@ -735,7 +749,7 @@ def display_map_and_filtered_incidents_table():
                                                                                                                                                                 # Disable all columns
                                                                                                                                                                 # Height displays every row at once, instead of scrolling within the table
             # Detect checked rows
-            checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
+            checked_index = edited_df.index[edited_df["🧾 View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
             # If any checkbox is checked, update session state and rerun
             if checked_index:
@@ -751,7 +765,8 @@ def display_validated_incidents_table():
 
         ##### Table #####
         # Initialise column headers and empty row
-        table_col = ["ID", "Street", "Date & Time", "Incident Type", "Incident Subtype", "Priority Score", "Status"]
+        table_col = ["ID", "Street", "Date & Time", "Incident Type", "Incident Subtype", "Priority", "Status"]
+        table_col = ["📌 ID", "🛣️ Street", "⏰ Date & Time", "⚠️ Incident Type", "📌 Incident Subtype", "🔥 Priority", "📦 Status"]
         empty = ["...", "...", "...", "...", "...", "...", "..."]
 
         # Initialise column headers and empty row
@@ -794,14 +809,14 @@ def display_validated_incidents_table():
 
             df.index.name = "S/N" # Rename index column
 
-            df["View Details"] = [False] * len(df) # Add view details column
+            df["🧾 View Details"] = [False] * len(df) # Add view details column
 
-            styled_df = df.style.map(highlight_priority, subset=["Priority Score"]) # Apply colour
+            styled_df = df.style.map(highlight_priority, subset=["🔥 Priority"]) # Apply colour
 
             edited_df = st.data_editor(styled_df, use_container_width=True, key="validated_incidents_editor", disabled=table_col) # Display table. Used over st.dataframe because this handles adjusting to the column width, 
                                                                                                                                                                 # and also allows checkboxes in tables
             # Detect checked rows
-            checked_index = edited_df.index[edited_df["View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
+            checked_index = edited_df.index[edited_df["🧾 View Details"]].tolist() # edited_df.index[...] keeps only indices where "View Details" is True i.e. checkbox is ticked
 
             # If any checkbox is checked, update session state and rerun
             if checked_index:
@@ -819,6 +834,7 @@ def display_incoming_incidents_table():
 
         # Initialise column headers and empty row
         table_col = ["ID", "Street", "Date & Time", "Incident Type", "Incident Subtype"]
+        table_col = ["📌 ID", "🛣️ Street", "⏰ Date & Time", "⚠️ Incident Type", "📌 Incident Subtype"]
         empty = ["...", "...", "...", "...", "..."]
 
         # If no incoming incidents, display empty table
@@ -871,6 +887,158 @@ def display_trademark():
     # Trademark 
     st.markdown("<p style='text-align: center;'>© 2025 OptiMove AI™.</p>", unsafe_allow_html=True)
 
+if "init_dummy" not in st.session_state:
+    st.session_state["init_dummy"] = False
+
+if not st.session_state["init_dummy"]:
+    ########################## DUMMY DATA
+    st.session_state["filtered"] = [
+        {
+        "crowdsource_event": {
+            "alert_subtype": None,
+            "alert_type": "ACCIDENT",
+            "reliability": 6,
+            "street": "Tampines Ave 10",
+            "timestamp": 1742476842.4073632,
+            "town": "Tampines",
+            "x": 103.928405,
+            "y": 1.354571
+        },
+        "id": 1,
+        "image_event": {
+            "camera_id": 7793,
+            "image_src": "data/car_accident.png"
+        },
+        "is_unique": True,
+        "priority_score": 0.65000000,
+        "repeated_events_crowdsource_id": [
+            2
+        ],
+        "speed_events": [
+            {
+            "current_avg_speed": 4,
+            "past_week_avg_speed": 20.4
+            },
+            {
+            "current_avg_speed": 5,
+            "past_week_avg_speed": 17.4
+            },
+            {
+            "current_avg_speed": 42,
+            "past_week_avg_speed": 45.0
+            },
+            {
+            "current_avg_speed": 30,
+            "past_week_avg_speed": 30.0
+            },
+            {
+            "current_avg_speed": 50,
+            "past_week_avg_speed": 43.4
+            },
+            {
+            "current_avg_speed": 55,
+            "past_week_avg_speed": 54.4
+            }
+        ]
+        },
+        {
+        "crowdsource_event": {
+            "alert_subtype": "HAZARD_ON_SHOULDER_CAR_STOPPED",
+            "alert_type": "HAZARD",
+            "reliability": 7,
+            "street": "Clementi Ave 6",
+            "timestamp": 1742486366.1760848,
+            "town": "Clementi",
+            "x": 103.762467,
+            "y": 1.317637
+        },
+        "id": 2,
+        "image_event": {
+            "camera_id": 4714,
+            "image_src": "data/car_road_shoulder.png"
+        },
+        "is_unique": True,
+        "priority_score": 0.250000003,
+        "repeated_events_crowdsource_id": [],
+        "speed_events": [
+            {
+            "current_avg_speed": 21,
+            "past_week_avg_speed": 20.4
+            },
+            {
+            "current_avg_speed": 18,
+            "past_week_avg_speed": 17.4
+            },
+            {
+            "current_avg_speed": 42,
+            "past_week_avg_speed": 45.0
+            },
+            {
+            "current_avg_speed": 29,
+            "past_week_avg_speed": 30.0
+            },
+            {
+            "current_avg_speed": 50,
+            "past_week_avg_speed": 43.4
+            },
+            {
+            "current_avg_speed": 55,
+            "past_week_avg_speed": 54.4
+            }
+        ]
+        },
+    ]
+
+    st.session_state["validated"] = [
+        {
+        "crowdsource_event": {
+            "alert_subtype": "HAZARD_ON_SHOULDER_CAR_STOPPED",
+            "alert_type": "HAZARD",
+            "reliability": 4,
+            "street": "CTE (AYE)",
+            "timestamp": 1742486371.224215,
+            "town": None,
+            "x": 103.839542,
+            "y": 1.286703
+        },
+        "id": 3,
+        "image_event": {
+            "camera_id": 1703,
+            "image_src": "data/car_normal.png"
+        },
+        "is_unique": True,
+        "priority_score": 0.2000005,
+        "repeated_events_crowdsource_id": [],
+        "speed_events": [
+            {
+            "current_avg_speed": 21,
+            "past_week_avg_speed": 20.4
+            },
+            {
+            "current_avg_speed": 18,
+            "past_week_avg_speed": 17.4
+            },
+            {
+            "current_avg_speed": 42,
+            "past_week_avg_speed": 45.0
+            },
+            {
+            "current_avg_speed": 29,
+            "past_week_avg_speed": 30.0
+            },
+            {
+            "current_avg_speed": 50,
+            "past_week_avg_speed": 43.4
+            },
+            {
+            "current_avg_speed": 55,
+            "past_week_avg_speed": 54.4
+            }
+        ],
+        "status": "❌ Undispatched",
+        }  
+    ]
+    st.session_state["init_dummy"] = True
 
 def main():
     st.set_page_config(layout="wide") # Enable full width mode
