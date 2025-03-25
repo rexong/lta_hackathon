@@ -1,5 +1,6 @@
 import pandas as pd
 import pydeck as pdk
+import os
 import streamlit as st
 import threading
 import requests
@@ -9,7 +10,7 @@ from streamlit.runtime.scriptrunner import add_script_run_ctx,get_script_run_ctx
 
 # GLOBAL VARIABLES
 # URL/URIs for retrieving incoming & filtered data
-URL = "http://localhost:5000"
+URL= os.getenv("BASE_URL", "http://localhost:5000")
 CROWDSOURCE_URI = "store/crowdsource"
 FILTERED_URI = "store/filtered"
 

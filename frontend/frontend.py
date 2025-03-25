@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 # GLOBAL VARIABLES
 # URL/URIs for retrieving incoming & filtered data
-URL = "http://localhost:5000"
+URL= os.getenv("BASE_URL", "http://localhost:5000")
 CROWDSOURCE_URI = "store/crowdsource"
 FILTERED_URI = "store/filtered"
 

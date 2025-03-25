@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 import random
 import requests
+import os
 import time
 
-url = "http://localhost:5000/events/crowdsource"
+addr = os.getenv("BASE_URL", "http://localhost:5000")
+url = f"{addr}/events/crowdsource"
 
 df = pd.read_csv("./data/csv/Waze_Alerts.csv")
 df.columns = df.columns.str.lower()

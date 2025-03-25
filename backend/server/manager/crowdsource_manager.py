@@ -2,13 +2,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import os
 import requests
 from backend.schema.event_storage import EventStorage
 from backend.schema.crowdsource_event import CrowdsourceEvent
 from backend.schema.image_event import ImageEvent
 from backend.schema.speed_event import SpeedEvent, SpeedEvents
 
-EXTERNAL_DATA_URL = "http://localhost:8000"
+EXTERNAL_DATA_URL = os.getenv("EXT_URL", "http://localhost:8000")
 TRAFFIC_IMAGE_URI = "traffic_image"
 TRAFFIC_SPEED_URI = "traffic_speed"
 

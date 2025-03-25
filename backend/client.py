@@ -1,9 +1,10 @@
 import time
 import threading
+import os
 import requests
 from sseclient import SSEClient
 
-URL = "http://localhost:5000"
+URL = os.getenv("BASE_URL", "http://localhost:5000")
 CROWDSOURCE_URI = "store/crowdsource"
 FILTERED_URI = "store/filtered"
 
