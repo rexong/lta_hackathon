@@ -595,6 +595,7 @@ def display_map_and_filtered_incidents_table():
                 if incident["id"] == 1:
                     incident["priority_score"] = 0.9
                     incident["crowdsource_event"]["alert_subtype"] = "Accident major"
+                    incident["repeated_events_crowdsource_id"] = [1]
                 elif incident["id"] == 2:
                     incident["priority_score"] = 0.5
                 else:
