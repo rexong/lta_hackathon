@@ -890,7 +890,7 @@ def display_trademark():
 
 
 def main():
-    st.set_page_config(layout="wide") # Enable full width mode
+    st.set_page_config(layout="wide", initial_sidebar_state="collapsed") # Enable full width mode
 
     load_css("styles.css") # Load CSS
 
