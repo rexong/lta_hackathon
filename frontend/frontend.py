@@ -245,7 +245,7 @@ def display_filtered_incident_details():
                                 else "Unknown"
                 ),
                 "camera_id": incident["image_event"]["camera_id"],
-                "image_src": convert_img(f"../{incident["image_event"]["image_src"]}", width=500), # Convert to base64
+                "image_src": convert_img(f"../{incident['image_event']['image_src']}", width=500), # Convert to base64
                 "number_of_similar": len(incident["repeated_events_crowdsource_id"]), # Number of reports on this incident including itself
                 "priority": bin_priority(incident["priority_score"]),
             }
@@ -267,7 +267,7 @@ def display_filtered_incident_details():
         parsed_incident = parse_incident(incident) # Used for displaying the incident in the table
         parsed_filtered = parse_filtered(incident) # Used for removing this incident from the "parsed_filtered" session state
 
-        st.title(f"📌 ID {incident["id"]}")
+        st.title(f"📌 ID {incident['id']}")
 
             
         priority_colour = get_colour(parsed_incident)
@@ -389,7 +389,7 @@ def display_validated_incident_details():
                                 else "Unknown"
                 ),
                 "camera_id": incident["image_event"]["camera_id"],
-                "image_src": convert_img(f"../{incident["image_event"]["image_src"]}", width=500), # Convert to base64
+                "image_src": convert_img(f"../{incident['image_event']['image_src']}", width=500), # Convert to base64
                 "number_of_similar": len(incident["repeated_events_crowdsource_id"]), # Number of reports similar to this incident
                 "priority": bin_priority(incident["priority_score"]),
                 "status": incident["status"]
@@ -399,7 +399,7 @@ def display_validated_incident_details():
             
         priority_colour = get_colour(parsed_incident)
 
-        st.title(f"📌 ID {incident["id"]}")
+        st.title(f"📌 ID {incident['id']}")
 
         # Display the table using HTML inside `st.markdown()`
         st.markdown(f"""
